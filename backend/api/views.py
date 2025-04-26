@@ -11,14 +11,6 @@ from .serializers import (
     ExpenseSerializer
 )
 from .models import Category, Expense
-from rest_framework.decorators import action
-from .models import Budget, Expense
-from .serializers import BudgetSerializer
-from datetime import datetime, timedelta
-from django.utils import timezone
-from django.db.models import Sum
-from django.db import transaction
-
 
 
 class CustomTokenObtainPairView(TokenObtainPairView):
@@ -357,6 +349,100 @@ def sync_transactions_endpoint(request):
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
+# Add to your views.py file
+
+from rest_framework import viewsets, permissions, status
+from rest_framework.response import Response
+from rest_framework.decorators import action
+from .models import Budget, Expense
+from .serializers import BudgetSerializer
+from datetime import datetime, timedelta
+from django.utils import timezone
+from django.db.models import Sum
+from django.db import transaction
+@api_view(['POST'])
+@permission_classes([permissions.IsAuthenticated])
+def sync_transactions_endpoint(request):
+    """Manually trigger transaction sync for all connected accounts"""
+    try:
+        items = PlaidItem.objects.filter(user=request.user)
+        if not items:
+            return Response({"error": "No connected bank accounts found"}, status=status.HTTP_404_NOT_FOUND)
+        
+        for item in items:
+            try:
+                # Implementation of sync_transactions
+                access_token = item.access_token
+                request_obj = TransactionsSyncRequest(
+                    access_token=access_token,
+                    cursor=None  # For a fresh sync, you might want to implement cursor storage
+                )
+                
+                response = plaid_client.transactions_sync(request_obj)
+                
+                # Process the added transactions (similar to ExchangePublicTokenView)
+                added_transactions = response['added']
+                default_category, _ = Category.objects.get_or_create(
+                    name="Uncategorized",
+                    defaults={"icon": "📋", "color": "#9E9E9E"}
+                )
+                
+                for transaction in added_transactions:
+                    # Skip pending transactions
+                    if transaction.get('pending', True):
+                        continue
+                    
+                    try:
+                        # Get account
+                        account = PlaidAccount.objects.get(
+                            plaid_item=item,
+                            account_id=transaction['account_id']
+                        )
+                        
+                        # Create or update transaction
+                        plaid_transaction, created = PlaidTransaction.objects.update_or_create(
+                            transaction_id=transaction['transaction_id'],
+                            defaults={
+                                'account': account,
+                                'amount': transaction['amount'],
+                                'date': transaction['date'],
+                                'name': transaction['name'],
+                                'merchant_name': transaction.get('merchant_name'),
+                                'payment_channel': transaction.get('payment_channel', ''),
+                                'pending': transaction.get('pending', False),
+                                'category': transaction.get('category', []),
+                                'category_id': transaction.get('category_id'),
+                                'location': transaction.get('location', {}),
+                                'payment_meta': transaction.get('payment_meta', {})
+                            }
+                        )
+                        
+                        # Create corresponding expense if this is a new transaction
+                        if created:
+                            expense = Expense.objects.create(
+                                user=item.user,
+                                title=transaction['name'],
+                                amount=abs(transaction['amount']),
+                                date=transaction['date'],
+                                category=default_category,
+                                comment=f"Imported from {account.name}",
+                                source='plaid'
+                            )
+                            
+                            # Link expense to transaction
+                            plaid_transaction.expense = expense
+                            plaid_transaction.save()
+                        
+                    except PlaidAccount.DoesNotExist:
+                        continue
+            except Exception as e:
+                # Log the error but continue with other items
+                print(f"Error syncing transactions for item {item.id}: {str(e)}")
+                continue
+            
+        return Response({"success": True, "message": "Transactions synced successfully"})
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class BudgetViewSet(viewsets.ModelViewSet):
@@ -383,6 +469,10 @@ class BudgetViewSet(viewsets.ModelViewSet):
         """
         Get budget summary including current spending against budgets
         """
+        from datetime import datetime, timedelta
+        from django.utils import timezone
+        from django.db.models import Sum
+        
         user = request.user
         today = timezone.now().date()
         
@@ -397,9 +487,14 @@ class BudgetViewSet(viewsets.ModelViewSet):
             budgets[budget.period] = float(budget.amount)
         
         # Calculate periods
-        start_of_day = datetime.combine(today, datetime.min.time())
-        start_of_week = (today - timedelta(days=today.weekday())).replace(hour=0, minute=0, second=0)
-        start_of_month = today.replace(day=1, hour=0, minute=0, second=0)
+        start_of_day = timezone.make_aware(datetime.combine(today, datetime.min.time()))
+        
+        # Calculate start of week (Monday as the first day of the week)
+        start_of_week = today - timedelta(days=today.weekday())
+        start_of_week = timezone.make_aware(datetime.combine(start_of_week, datetime.min.time()))
+        
+        # Calculate start of month
+        start_of_month = timezone.make_aware(datetime.combine(today.replace(day=1), datetime.min.time()))
         
         # Get spending for each period
         daily_spending = Expense.objects.filter(
@@ -407,23 +502,23 @@ class BudgetViewSet(viewsets.ModelViewSet):
         ).aggregate(total=Sum('amount'))['total'] or 0
         
         weekly_spending = Expense.objects.filter(
-            user=user, date__gte=start_of_week, date__lte=today
+            user=user, date__gte=start_of_week.date(), date__lte=today
         ).aggregate(total=Sum('amount'))['total'] or 0
         
         monthly_spending = Expense.objects.filter(
-            user=user, date__gte=start_of_month, date__lte=today
+            user=user, date__gte=start_of_month.date(), date__lte=today
         ).aggregate(total=Sum('amount'))['total'] or 0
         
-        # Calculate percentages
-        daily_percentage = (float(daily_spending) / budgets['daily'] * 100) if budgets['daily'] else 0
-        weekly_percentage = (float(weekly_spending) / budgets['weekly'] * 100) if budgets['weekly'] else 0
-        monthly_percentage = (float(monthly_spending) / budgets['monthly'] * 100) if budgets['monthly'] else 0
+        # Calculate percentages (avoid division by zero)
+        daily_percentage = (float(daily_spending) / budgets['daily'] * 100) if budgets['daily'] and budgets['daily'] > 0 else 0
+        weekly_percentage = (float(weekly_spending) / budgets['weekly'] * 100) if budgets['weekly'] and budgets['weekly'] > 0 else 0
+        monthly_percentage = (float(monthly_spending) / budgets['monthly'] * 100) if budgets['monthly'] and budgets['monthly'] > 0 else 0
         
         # Prepare category breakdown for the current month
         category_breakdown = []
         
         category_totals = Expense.objects.filter(
-            user=user, date__gte=start_of_month, date__lte=today
+            user=user, date__gte=start_of_month.date(), date__lte=today
         ).values('category').annotate(total=Sum('amount'))
         
         for item in category_totals:
@@ -436,7 +531,7 @@ class BudgetViewSet(viewsets.ModelViewSet):
                         'icon': category.icon,
                         'color': category.color,
                         'amount': float(item['total']),
-                        'percentage': float(item['total']) / float(monthly_spending) * 100 if monthly_spending else 0
+                        'percentage': float(item['total']) / float(monthly_spending) * 100 if monthly_spending and monthly_spending > 0 else 0
                     })
                 except Category.DoesNotExist:
                     pass
@@ -465,6 +560,8 @@ class BudgetViewSet(viewsets.ModelViewSet):
         """
         Set all budget periods at once
         """
+        from django.db import transaction
+        
         data = request.data
         user = request.user
         

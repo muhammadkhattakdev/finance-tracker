@@ -5,6 +5,8 @@
     padding: 24px;
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
     margin-bottom: 30px;
+    width: 100%;
+    box-sizing: border-box;
   }
   
   .category-chart-header {
@@ -12,6 +14,8 @@
     justify-content: space-between;
     align-items: center;
     margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 12px;
   }
   
   .category-chart-header h2 {
@@ -24,6 +28,7 @@
   .total-expenses {
     font-size: 1rem;
     color: var(--text-muted);
+    white-space: nowrap;
   }
   
   .total-expenses span {
@@ -35,6 +40,8 @@
     display: flex;
     justify-content: center;
     position: relative;
+    width: 100%;
+    min-height: 300px;
   }
   
   .pie-chart-tooltip {
@@ -45,22 +52,28 @@
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
     text-align: left;
     min-width: 150px;
+    max-width: 220px;
   }
   
   .tooltip-category {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
     margin-bottom: 5px;
   }
   
   .tooltip-icon {
-    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
   
   .tooltip-name {
     font-weight: 500;
     font-size: 0.95rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
   
   .tooltip-value {
@@ -75,19 +88,20 @@
   }
   
   .pie-chart-legend {
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
     gap: 10px;
     margin-top: 20px;
     padding-top: 10px;
     border-top: 1px solid var(--border-color);
-    max-width: 100%;
+    width: 100%;
   }
   
   .legend-item {
     display: flex;
     align-items: center;
     gap: 10px;
+    min-width: 0; /* Important for text-overflow to work */
   }
   
   .legend-color {
@@ -102,6 +116,7 @@
     justify-content: space-between;
     align-items: center;
     width: 100%;
+    min-width: 0; /* Important for text-overflow to work */
   }
   
   .legend-name {
@@ -110,14 +125,21 @@
     gap: 6px;
     font-size: 0.9rem;
     color: var(--text-dark);
-    white-space: nowrap;
     overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 150px;
+    min-width: 0; /* Important for text-overflow to work */
   }
   
   .legend-icon {
-    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  
+  .legend-text {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
   
   .legend-value {
@@ -125,6 +147,8 @@
     font-weight: 500;
     color: var(--primary);
     white-space: nowrap;
+    flex-shrink: 0;
+    margin-left: 8px;
   }
   
   .legend-more {
@@ -133,6 +157,7 @@
     text-align: center;
     margin-top: 5px;
     font-style: italic;
+    grid-column: 1 / -1;
   }
   
   .pie-chart-label {
@@ -166,12 +191,25 @@
       height: 260px;
     }
     
-    .legend-item {
-      max-width: 100%;
+    .pie-chart-legend {
+      grid-template-columns: 1fr;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .legend-content {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 4px;
     }
     
-    .legend-name {
-      max-width: 120px;
+    .legend-value {
+      margin-left: 0;
+      margin-top: 2px;
+    }
+    
+    .pie-chart-tooltip {
+      max-width: 90vw;
     }
   }
   

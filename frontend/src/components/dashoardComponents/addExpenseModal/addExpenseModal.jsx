@@ -13,7 +13,6 @@ const ExpenseModal = ({ onClose, onSave, categories }) => {
   const modalRef = useRef(null);
   const firstInputRef = useRef(null);
 
-  // Focus first input when modal opens
   useEffect(() => {
     if (firstInputRef.current) {
       firstInputRef.current.focus();
