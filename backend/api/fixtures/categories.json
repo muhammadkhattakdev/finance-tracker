@@ -1,0 +1,137 @@
+[
+    {
+      "model": "api.category",
+      "pk": 1,
+      "fields": {
+        "name": "Groceries",
+        "icon": "🛒",
+        "color": "#4CAF50"
+      }
+    },
+    {
+      "model": "api.category",
+      "pk": 2,
+      "fields": {
+        "name": "Dining",
+        "icon": "🍽️",
+        "color": "#FF9800"
+      }
+    },
+    {
+      "model": "api.category",
+      "pk": 3,
+      "fields": {
+        "name": "Transportation",
+        "icon": "🚗",
+        "color": "#2196F3"
+      }
+    },
+    {
+      "model": "api.category",
+      "pk": 4,
+      "fields": {
+        "name": "Entertainment",
+        "icon": "🎬",
+        "color": "#9C27B0"
+      }
+    },
+    {
+      "model": "api.category",
+      "pk": 5,
+      "fields": {
+        "name": "Shopping",
+        "icon": "🛍️",
+        "color": "#E91E63"
+      }
+    },
+    {
+      "model": "api.category",
+      "pk": 6,
+      "fields": {
+        "name": "Utilities",
+        "icon": "💡",
+        "color": "#607D8B"
+      }
+    },
+    {
+      "model": "api.category",
+      "pk": 7,
+      "fields": {
+        "name": "Housing",
+        "icon": "🏠",
+        "color": "#795548"
+      }
+    },
+    {
+      "model": "api.category",
+      "pk": 8,
+      "fields": {
+        "name": "Healthcare",
+        "icon": "🏥",
+        "color": "#F44336"
+      }
+    },
+    {
+      "model": "api.category",
+      "pk": 9,
+      "fields": {
+        "name": "Education",
+        "icon": "📚",
+        "color": "#009688"
+      }
+    },
+    {
+      "model": "api.category",
+      "pk": 10,
+      "fields": {
+        "name": "Travel",
+        "icon": "✈️",
+        "color": "#3F51B5"
+      }
+    },
+    {
+      "model": "api.category",
+      "pk": 11,
+      "fields": {
+        "name": "Gifts",
+        "icon": "🎁",
+        "color": "#E040FB"
+      }
+    },
+    {
+      "model": "api.category",
+      "pk": 12,
+      "fields": {
+        "name": "Personal Care",
+        "icon": "💇",
+        "color": "#8BC34A"
+      }
+    },
+    {
+      "model": "api.category",
+      "pk": 13,
+      "fields": {
+        "name": "Fitness",
+        "icon": "🏋️",
+        "color": "#FFC107"
+      }
+    },
+    {
+      "model": "api.category",
+      "pk": 14,
+      "fields": {
+        "name": "Subscriptions",
+        "icon": "📱",
+        "color": "#00BCD4"
+      }
+    },
+    {
+      "model": "api.category",
+      "pk": 15,
+      "fields": {
+        "name": "Other",
+        "icon": "📌",
+        "color": "#9E9E9E"
+      }
+    }
+  ]

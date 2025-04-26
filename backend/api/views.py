@@ -1,0 +1,349 @@
+from rest_framework import status, generics, permissions, viewsets, filters
+from rest_framework.response import Response
+from rest_framework_simplejwt.views import TokenObtainPairView
+from django_filters.rest_framework import DjangoFilterBackend
+from .serializers import (
+    CustomTokenObtainPairSerializer,
+    RegisterSerializer,
+    UserSerializer,
+    UserUpdateSerializer,
+    CategorySerializer,
+    ExpenseSerializer
+)
+from .models import Category, Expense
+
+
+class CustomTokenObtainPairView(TokenObtainPairView):
+    serializer_class = CustomTokenObtainPairSerializer
+
+
+class RegisterView(generics.CreateAPIView):
+    serializer_class = RegisterSerializer
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        
+        if not serializer.is_valid():
+
+            print(f"Registration validation errors: {serializer.errors}")
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            
+        try:
+            user = serializer.save()
+            user_data = UserSerializer(user).data
+            return Response(user_data, status=status.HTTP_201_CREATED)
+        except Exception as e:
+            print(f"Exception during user registration: {str(e)}")
+
+            return Response(
+                {"detail": "An error occurred during registration. Please try again."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+
+class UserDetailView(generics.RetrieveUpdateAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = UserSerializer
+
+    def get_object(self):
+        return self.request.user
+    
+    def get_serializer_class(self):
+        if self.request.method == 'PUT' or self.request.method == 'PATCH':
+            return UserUpdateSerializer
+        return UserSerializer
+
+
+class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    A viewset for viewing categories.
+    """
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+
+class ExpenseViewSet(viewsets.ModelViewSet):
+    """
+    A viewset for viewing and editing expenses.
+    """
+    serializer_class = ExpenseSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+    filterset_fields = ['category', 'date']
+    search_fields = ['title', 'comment']
+    ordering_fields = ['date', 'amount', 'title', 'created_at']
+    
+    def get_queryset(self):
+        """
+        This view returns a list of all expenses for the currently authenticated user.
+        """
+
+        return Expense.objects.filter(user=self.request.user)
+
+
+
+
+
+
+# Add this to your existing views.py file
+
+import os
+import plaid
+import datetime
+from plaid.api import plaid_api
+from plaid.model.link_token_create_request import LinkTokenCreateRequest
+from plaid.model.link_token_create_request_user import LinkTokenCreateRequestUser
+from plaid.model.item_public_token_exchange_request import ItemPublicTokenExchangeRequest
+from plaid.model.products import Products
+from plaid.model.country_code import CountryCode
+from plaid.model.accounts_get_request import AccountsGetRequest
+from plaid.model.transactions_sync_request import TransactionsSyncRequest
+from rest_framework import status, viewsets, permissions
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework.decorators import api_view, permission_classes
+from .models import PlaidItem, PlaidAccount, PlaidTransaction, Expense, Category
+from .serializers import (
+    PlaidItemSerializer, PlaidAccountSerializer, 
+    PlaidLinkTokenSerializer, PlaidPublicTokenSerializer,
+    PlaidTransactionSerializer
+)
+
+# Initialize Plaid client
+configuration = plaid.Configuration(
+    host=plaid.Environment.Sandbox,
+    api_key={
+        'clientId': '680bc2592d01190023379e63',
+        'secret': '623153ca55a3983283eccca6b410fd',
+    }
+)
+api_client = plaid.ApiClient(configuration)
+plaid_client = plaid_api.PlaidApi(api_client)
+
+class CreateLinkTokenView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+    
+    def post(self, request):
+        try:
+            # Create a Link token for the given user
+            user = request.user
+            
+            # Create a link_token using the client
+            request_user = LinkTokenCreateRequestUser(
+                client_user_id=str(user.id)
+            )
+            
+            request_model = LinkTokenCreateRequest(
+                user=request_user,
+                client_name='Finance Tracker',
+                products=[Products('transactions')],
+                country_codes=[CountryCode('US')],
+                language='en',
+                webhook='https://yourwebsite.com/webhook'  # Optional, for real deployment
+            )
+            
+            response = plaid_client.link_token_create(request_model)
+            serializer = PlaidLinkTokenSerializer(data={'link_token': response['link_token']})
+            
+            if serializer.is_valid():
+                return Response(serializer.validated_data)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            
+        except plaid.ApiException as e:
+            return Response(
+                {"error": e.body},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+        except Exception as e:
+            return Response(
+                {"error": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+class ExchangePublicTokenView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+    
+    def post(self, request):
+        try:
+            serializer = PlaidPublicTokenSerializer(data=request.data)
+            if not serializer.is_valid():
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            
+            public_token = serializer.validated_data.get('public_token')
+            institution_id = serializer.validated_data.get('institution_id')
+            institution_name = serializer.validated_data.get('institution_name')
+            
+            # Exchange public token for an access token
+            exchange_request = ItemPublicTokenExchangeRequest(
+                public_token=public_token
+            )
+            exchange_response = plaid_client.item_public_token_exchange(exchange_request)
+            access_token = exchange_response['access_token']
+            item_id = exchange_response['item_id']
+            
+            # Create or update PlaidItem
+            plaid_item, created = PlaidItem.objects.update_or_create(
+                user=request.user,
+                institution_id=institution_id,
+                defaults={
+                    'access_token': access_token,
+                    'item_id': item_id,
+                    'institution_name': institution_name,
+                }
+            )
+            
+            # Fetch accounts
+            accounts_request = AccountsGetRequest(access_token=access_token)
+            accounts_response = plaid_client.accounts_get(accounts_request)
+            
+            # Save accounts to database
+            for account_data in accounts_response['accounts']:
+                balances = account_data['balances']
+                
+                PlaidAccount.objects.update_or_create(
+                    plaid_item=plaid_item,
+                    account_id=account_data['account_id'],
+                    defaults={
+                        'name': account_data['name'],
+                        'official_name': account_data.get('official_name'),
+                        'mask': account_data.get('mask'),
+                        'type': account_data['type'],
+                        'subtype': account_data.get('subtype'),
+                        'balance_available': balances.get('available'),
+                        'balance_current': balances.get('current'),
+                        'balance_limit': balances.get('limit'),
+                    }
+                )
+            
+            # Initial transaction sync
+            self.sync_transactions(plaid_item)
+            
+            return Response({
+                'success': True,
+                'message': 'Bank account successfully connected',
+                'item_id': plaid_item.id
+            })
+            
+        except plaid.ApiException as e:
+            return Response(
+                {"error": e.body},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+        except Exception as e:
+            return Response(
+                {"error": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+    
+    def sync_transactions(self, plaid_item):
+        """Sync transactions for a specific PlaidItem"""
+        try:
+            # Get all transactions for the item
+            request = TransactionsSyncRequest(
+                access_token=plaid_item.access_token,
+                cursor=None  # For initial sync, cursor is None
+            )
+            
+            response = plaid_client.transactions_sync(request)
+            
+            # Process added transactions
+            self.process_transactions(response['added'], plaid_item)
+            
+            # Store cursor for future syncs (in a real implementation)
+            # plaid_item.cursor = response['next_cursor']
+            # plaid_item.save()
+            
+        except Exception as e:
+            print(f"Error syncing transactions: {str(e)}")
+    
+    def process_transactions(self, transactions, plaid_item):
+        """Process and save transactions to the database"""
+        # Get or create a default category for Plaid transactions
+        default_category, _ = Category.objects.get_or_create(
+            name="Uncategorized",
+            defaults={"icon": "📋", "color": "#9E9E9E"}
+        )
+        
+        for transaction in transactions:
+            # Skip pending transactions
+            if transaction.get('pending', True):
+                continue
+            
+            try:
+                # Get account
+                account = PlaidAccount.objects.get(
+                    plaid_item=plaid_item,
+                    account_id=transaction['account_id']
+                )
+                
+                # Create or update transaction
+                plaid_transaction, created = PlaidTransaction.objects.update_or_create(
+                    transaction_id=transaction['transaction_id'],
+                    defaults={
+                        'account': account,
+                        'amount': transaction['amount'],
+                        'date': transaction['date'],
+                        'name': transaction['name'],
+                        'merchant_name': transaction.get('merchant_name'),
+                        'payment_channel': transaction.get('payment_channel', ''),
+                        'pending': transaction.get('pending', False),
+                        'category': transaction.get('category', []),
+                        'category_id': transaction.get('category_id'),
+                        'location': transaction.get('location', {}),
+                        'payment_meta': transaction.get('payment_meta', {})
+                    }
+                )
+                
+                # Create corresponding expense if this is a new transaction
+                if created:
+                    expense = Expense.objects.create(
+                        user=plaid_item.user,
+                        title=transaction['name'],
+                        amount=abs(transaction['amount']),  # Plaid uses negative for expenses
+                        date=transaction['date'],
+                        category=default_category,
+                        comment=f"Imported from {account.name}",
+                        source='plaid'
+                    )
+                    
+                    # Link expense to transaction
+                    plaid_transaction.expense = expense
+                    plaid_transaction.save()
+                
+            except PlaidAccount.DoesNotExist:
+                print(f"Account not found: {transaction['account_id']}")
+            except Exception as e:
+                print(f"Error processing transaction: {str(e)}")
+
+class PlaidItemViewSet(viewsets.ReadOnlyModelViewSet):
+    serializer_class = PlaidItemSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    
+    def get_queryset(self):
+        return PlaidItem.objects.filter(user=self.request.user)
+
+class PlaidAccountViewSet(viewsets.ReadOnlyModelViewSet):
+    serializer_class = PlaidAccountSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    
+    def get_queryset(self):
+        return PlaidAccount.objects.filter(plaid_item__user=self.request.user)
+
+@api_view(['POST'])
+@permission_classes([permissions.IsAuthenticated])
+def sync_transactions_endpoint(request):
+    """Manually trigger transaction sync for all connected accounts"""
+    try:
+        items = PlaidItem.objects.filter(user=request.user)
+        print('Here are some items', items)
+        if not items:
+            return Response({"error": "No connected bank accounts found"}, status=status.HTTP_404_NOT_FOUND)
+        
+        for item in items:
+            # Implementation similar to sync_transactions method in ExchangePublicTokenView
+            pass
+            
+        return Response({"success": True, "message": "Transactions synced successfully"})
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

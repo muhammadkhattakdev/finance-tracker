@@ -1,0 +1,1633 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&family=Work+Sans:ital,wght@0,100..900;1,100..900&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+body {
+    font-family: 'Roboto', serif;
+}
+/* General CSS start */
+.d-flex {
+    display: flex !important;
+}
+.align-items-center {
+    align-items: center !important;
+}
+.justify-content-between {
+    justify-content: space-between !important;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+/* General CSS end */
+
+/* Header CSS Start */
+
+.px-primary {
+    padding: 0 80px;
+}
+input {
+    color: rgba(5, 7, 74, 1) !important;
+}
+.header {
+    position: fixed;
+    top: 0;
+    right: 0;
+    left: 0;
+    background-color: white;
+    padding: 24px 0;
+    border-bottom: 1px solid rgba(247, 247, 247, 1);
+}
+.header .navbar {
+    gap: 40px;
+}
+.header .nav-links-box .nav-links {
+    gap: 24px;
+}
+.header .nav-links-box .nav-links li {
+    list-style: none;
+}
+.header .nav-links-box .nav-links .nav-link {
+    text-decoration: none;
+    font-size: 700px;
+    font-size: 15px;
+    color: rgba(9, 13, 17, 1);
+}
+.header .nav-links-box .nav-links .nav-link:hover {
+    color: rgba(67, 187, 230, 1);
+}
+.header .nav-container .nav-logo-box {
+    width: 77px;
+}
+
+.header .nav-container .logged-account-container {
+    gap: 24px;
+}
+.header .nav-container .logged-account-container .account-box {
+    gap: 14px;
+}
+.header
+    .nav-container
+    .logged-account-container
+    .account-box
+    .account-avatar-box {
+    width: 45px;
+    height: 45px;
+    border-radius: 50px;
+    overflow: hidden;
+    cursor: pointer;
+}
+.header
+    .nav-container
+    .logged-account-container
+    .account-box
+    .account-avatar-box
+    .account-avatar {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.header .nav-container .logged-account-container .account-box .account-name {
+    font-weight: 700;
+    font-size: 15px;
+    color: rgba(9, 13, 17, 1);
+}
+.header .nav-container .logged-account-container .logout-btn {
+    width: 44px;
+    height: 45px;
+    border-radius: 8px;
+    padding: 12px;
+    border: 1px solid rgba(234, 235, 235, 1);
+    cursor: pointer;
+    background-color: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.header .nav-registration-btns-box {
+    gap: 24px;
+}
+.company-info-section .company-info-box {
+    gap: 80px;
+}
+.company-info-section .info-side,
+.company-info-section .pictures-side {
+    width: 50%;
+}
+.header .nav-registration-btns-box button,
+.header .nav-registration-btns-box .login-btn,
+.banner-section .banner-box .empower-side .login-btn,
+.company-info-section .info-side .login-btn,
+.my-expenses-section .my-expenses-header-btns .my-expenses-btn,
+.add-new-expense-section
+    .add-new-expense-box
+    .add-new-expense-form-btns
+    .add-new-expense-btn {
+    border-radius: 8px;
+    border: 1px solid rgba(234, 235, 235, 1);
+    padding: 12px 16px;
+    font-weight: 700;
+    font-size: 14px;
+    color: rgba(9, 13, 17, 1);
+    cursor: pointer;
+    text-decoration: none;
+}
+.header .nav-registration-btns-box button:hover,
+.header .nav-registration-btns-box .login-btn:hover,
+.banner-section .banner-box .empower-side .login-btn:hover,
+.company-info-section .info-side .login-btn:hover,
+.my-expenses-section .my-expenses-header-btns .my-expenses-btn:hover,
+.add-new-expense-section
+    .add-new-expense-box
+    .add-new-expense-form-btns
+    .add-new-expense-btn:hover,
+.my-expenses-section .my-expenses-header-btns .my-expenses-btn.export:hover {
+    background-color: rgba(11, 56, 121, 1) !important;
+    color: rgba(255, 255, 255, 1);
+}
+.add-new-expense-section
+    .add-new-expense-box
+    .add-new-expense-form-btns
+    .add-new-expense-btn {
+    background-color: transparent;
+    padding: 12px 24px;
+}
+.header .nav-registration-btns-box button.get-started-btn,
+.banner-section .banner-box .empower-side .login-btn.get-started,
+.company-info-section .info-side .login-btn.get-started,
+.my-expenses-section .my-expenses-header-btns .my-expenses-btn,
+.add-new-expense-section
+    .add-new-expense-box
+    .add-new-expense-form-btns
+    .add-new-expense-btn.save {
+    color: rgba(255, 255, 255, 1);
+    background-color: rgba(5, 7, 74, 1);
+}
+.my-expenses-section .my-expenses-header-btns .my-expenses-btn.export {
+    background-color: rgba(255, 255, 255, 1);
+    color: rgba(9, 13, 17, 1);
+}
+
+/* Header CSS End */
+
+/* Main Section Start */
+
+.banner-section {
+    width: 100%;
+    height: 100vh;
+    justify-content: center;
+}
+.banner-section .banner-box {
+    width: 100%;
+}
+
+.banner-section .banner-box .empower-side,
+.company-info-section .info-side .info-side-box {
+    flex-direction: column !important;
+    gap: 30px !important;
+}
+.banner-section .banner-box .empower-side .banner-main-text,
+.company-info-section .info-side .company-info-main-text {
+    font-size: 600px;
+    font-size: 60px;
+    color: rgba(5, 7, 74, 1);
+}
+.company-info-section .company-info-box .info-side-box .btns-box {
+    gap: 16px;
+}
+.banner-section .banner-box .empower-side .info-text,
+.company-info-section .info-side .info-text {
+    font-weight: 400;
+    font-size: 18px;
+    color: rgba(9, 13, 17, 1);
+}
+.banner-section .banner-box .empower-side {
+    width: 640px;
+}
+.banner-section .banner-box .card-side {
+    width: 640px;
+    justify-content: center;
+}
+.banner-section .banner-box .empower-side .btns-box,
+.my-expenses-section .my-expenses-header-btns {
+    gap: 16px;
+}
+
+.trusted-section {
+    background-color: rgba(5, 7, 74, 1);
+    color: white;
+    padding: 40px 0;
+}
+
+.trusted-section .trusted-box {
+    flex-direction: column;
+    gap: 24px;
+}
+.trusted-section .trusted-box .trusted-companies-box {
+    gap: 100px;
+    justify-content: center;
+}
+.trusted-section .trusted-box .trusted-companies-box .trusted-company {
+    gap: 10px;
+}
+.trusted-section
+    .trusted-box
+    .trusted-companies-box
+    .trusted-company
+    .company-name-text {
+    font-weight: 700;
+    font-size: 16px;
+    color: rgba(255, 255, 255, 1);
+}
+.trusted-section .trusted-main-text {
+    text-align: center;
+}
+.trusted-section .pictures-side .first-pic-box {
+    width: 388px;
+}
+.company-info-section .pictures-side .first-pic-box img,
+.company-info-section .pictures-side .second-picture-box img {
+    width: 100%;
+    height: 467px;
+    border-radius: 20px;
+    object-fit: cover;
+}
+.company-info-section .pictures-side .second-picture-box {
+    height: 100%;
+    border: 1px solid rgba(234, 235, 235, 1);
+    border-radius: 20px;
+}
+.company-info-section .pictures-side .second-picture-box img {
+    height: 100%;
+}
+
+.company-info-section {
+    width: 100%;
+    min-height: 100vh;
+}
+.company-info-section .company-info-box .pictures-side {
+    gap: 24px;
+}
+.company-info-section .company-info-box .pictures-side .second-pic-box {
+    flex-direction: column;
+    gap: 24px;
+}
+.company-info-section
+    .company-info-box
+    .pictures-side
+    .second-pic-box
+    .info-box {
+    padding: 27px 10px;
+    border-radius: 20px;
+    border: 1px solid rgba(234, 235, 235, 1);
+    background-color: rgba(247, 247, 247, 1);
+    font-weight: 500;
+    font-size: 24px;
+    color: rgba(9, 13, 17, 1);
+}
+
+.about-section {
+    width: 100%;
+    min-height: 100vh;
+    justify-content: center;
+    margin-bottom: 40px;
+}
+.about-section .about-box {
+    flex-direction: column;
+    gap: 40px;
+    padding-top: 100px;
+}
+.about-section .about-header {
+    justify-content: center;
+}
+.about-section .about-main-text {
+    font-weight: 600;
+    font-size: 40px;
+    color: rgba(9, 13, 17, 1);
+    text-align: center;
+    width: 500px;
+}
+
+.about-section .about-main-box {
+    gap: 40px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+.about-section .about-main-box .about-card {
+    background-color: rgba(247, 247, 247, 1);
+    border: 1px solid rgba(234, 235, 235, 1);
+    padding: 40px 30px;
+    border-radius: 20px;
+    width: 600px;
+    height: 326px;
+    overflow: hidden;
+}
+.about-section .about-main-box .about-card.full-img {
+    padding: 0;
+}
+.about-section .about-main-box .about-card.full-img img {
+    width: 100%;
+}
+.about-section .about-main-box .about-card.p-0 {
+    padding: 0 !important;
+}
+.about-section .about-main-box .about-card .about-card-header {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    margin-bottom: 60px;
+}
+
+.about-section
+    .about-main-box
+    .about-card
+    .about-card-header
+    .about-card-header-text {
+    font-weight: 500;
+    font-size: 24px;
+    color: rgba(9, 13, 17, 1);
+    font-family: Poppins;
+}
+.about-section .about-main-box .about-card .about-card-main p {
+    font-weight: 400;
+    font-size: 18px;
+    color: rgba(9, 13, 17, 1);
+}
+.about-section .about-main-box .about-card .about-card-main {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.footer {
+    padding: 80px 0;
+    background-color: rgba(5, 7, 74, 1);
+    color: white;
+}
+.footer .footer-section .footer-box .footer-social .footer-info {
+    flex-direction: column;
+    gap: 24px;
+}
+
+.footer
+    .footer-section
+    .footer-box
+    .footer-social
+    .footer-info
+    .footer-social-text {
+    font-weight: 400;
+    font-size: 16px;
+    color: rgba(255, 255, 255, 1);
+}
+.footer .footer-section .footer-box .footer-social .social-links-box {
+    gap: 24px;
+    cursor: pointer;
+}
+.footer .footer-section .footer-box .footer-links-box .footer-gmail {
+    gap: 10px;
+    cursor: pointer;
+}
+.footer
+    .footer-section
+    .footer-box
+    .footer-links-box
+    .footer
+    .footer-section
+    .footer-box
+    .footer-links-box
+    .footer-gmail-text {
+    font-weight: 400;
+    font-size: 18px;
+    color: rgba(255, 255, 255, 1);
+}
+
+.footer .footer-section .footer-box .footer-links-box .footer-quick-links-box {
+    flex-direction: column;
+    gap: 10px;
+}
+.footer
+    .footer-section
+    .footer-box
+    .footer-links-box
+    .footer-quick-links-box
+    .footer-quick-links {
+    gap: 24px;
+}
+.footer
+    .footer-section
+    .footer-box
+    .footer-links-box
+    .footer-quick-links-box
+    .footer-quick-links
+    .footer-quick-link {
+    font-weight: 700;
+    font-size: 15px;
+    color: rgba(255, 255, 255, 1);
+    text-decoration: none;
+}
+
+.login-section {
+    width: 100%;
+    margin-top: 90px;
+    justify-content: center;
+    padding: 40px 0;
+}
+.login-section .login-box {
+    flex-direction: column;
+    gap: 60px;
+}
+.login-section .login-box .login-header {
+    flex-direction: column;
+}
+.login-section .login-box .login-header {
+    gap: 20px;
+}
+.login-section .login-box .login-header .sign-in-text {
+    font-weight: 600;
+    font-size: 54px;
+    color: rgba(5, 7, 74, 1);
+    text-transform: capitalize;
+}
+.login-section .login-box .login-header .sign-in-text .blue-text {
+    color: rgb(7, 217, 217);
+}
+.login-section .login-box .login-header .login-info-text {
+    font-weight: 400;
+    font-size: 18px;
+    color: rgba(9, 13, 17, 1);
+}
+
+.login-section .login-box .login-form {
+    flex-direction: column;
+    gap: 40px;
+}
+.login-section .login-box .login-form .login-input-box {
+    flex-direction: column;
+    gap: 10px;
+}
+.login-section .login-box .login-form .login-input-box .login-input-box-label {
+    font-weight: 600;
+    font-size: 14px;
+    color: rgba(9, 13, 17, 1);
+}
+.login-section .login-box .login-form .login-input-box .login-input {
+    border-radius: 4px;
+    border: 1px solid rgba(185, 184, 188, 1);
+    padding: 10px 20px;
+    font-weight: 400;
+    font-size: 16px;
+    color: rgba(9, 13, 17, 1);
+}
+.login-section .login-box .login-form .login-input-box .forgot-password {
+    font-weight: 600;
+    font-size: 16px;
+    color: rgba(9, 13, 17, 1);
+    text-align: right;
+    text-decoration: none;
+}
+
+.login-section .login-box .login-form .login-input-btns {
+    flex-direction: column;
+    gap: 20px;
+}
+
+.login-section .login-box .login-form .login-input-btns .btn-login {
+    padding: 12px 16px;
+    border-radius: 8px;
+    background-color: rgba(5, 7, 74, 1);
+    font-weight: 700;
+    font-size: 14px;
+    color: rgba(255, 255, 255, 1);
+    cursor: pointer;
+    text-transform: uppercase;
+}
+.login-section .login-box .login-form .login-input-btns .question-text {
+    font-weight: 400;
+    font-size: 16px;
+    color: rgba(9, 13, 17, 1);
+    text-align: center;
+}
+.login-section
+    .login-box
+    .login-form
+    .login-input-btns
+    .question-text
+    .account-creation-btn {
+    font-weight: 700;
+    background-color: transparent;
+    font-size: 16px;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    color: rgba(9, 13, 17, 1);
+}
+
+.my-expenses-section {
+    margin-top: 90px;
+    background-color: rgb(242, 242, 242);
+    padding: 80px 0;
+}
+
+.my-expenses-section .my-expenses-box {
+    flex-direction: column;
+    gap: 80px;
+}
+
+.my-expenses-section .my-expenses-box .my-expenses-header {
+    flex-direction: column;
+    gap: 24px;
+}
+.my-expenses-section
+    .my-expenses-box
+    .my-expenses-header
+    .my-expenses-header-text {
+    font-weight: 600;
+    font-size: 40px;
+    color: rgba(9, 13, 17, 1);
+}
+.my-expenses-section
+    .my-expenses-box
+    .my-expenses-header
+    .my-expenses-header-box
+    .my-expenses-header-input,
+.add-new-expense-section .add-new-expense-box .add-new-expense-input-box input {
+    border-radius: 8px;
+    border: 1px solid rgba(234, 235, 235, 1);
+    padding: 12px;
+    color: rgba(185, 184, 188, 1);
+    font-weight: 400;
+    font-size: 16px;
+    width: 391px;
+}
+
+.my-expenses-section .my-expenses-box .my-expenses-main {
+    gap: 40px;
+    flex-direction: column;
+}
+.my-expenses-section .my-expenses-box .my-expenses-main .my-expenses-main-tabs {
+    gap: 10px;
+}
+.my-expenses-section
+    .my-expenses-box
+    .my-expenses-main
+    .my-expenses-main-tabs
+    .tab-btn {
+    padding: 12px 16px;
+    border: none;
+    background-color: transparent;
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 24px;
+    color: rgba(9, 13, 17, 1);
+    border-bottom: 2px solid transparent;
+}
+.my-expenses-section
+    .my-expenses-box
+    .my-expenses-main
+    .my-expenses-main-tabs
+    .tab-btn.blue,
+.my-expenses-section
+    .my-expenses-box
+    .my-expenses-main
+    .my-expenses-main-tabs
+    .tab-btn:hover {
+    color: rgba(67, 187, 230, 1);
+    border-bottom: 2px solid rgba(67, 187, 230, 1);
+}
+.my-expenses-section .my-expenses-box .my-expenses-main select,
+.add-new-expense-section .add-new-expense-box .add-new-expense-input-box select,
+.add-new-expense-section
+    .add-new-expense-box
+    .add-new-expense-input-box
+    textarea {
+    border-radius: 8px;
+    padding: 10px 14px;
+    width: 384px;
+    font-weight: 400;
+    font-size: 16px;
+    color: rgba(9, 13, 17, 1);
+    text-transform: uppercase;
+    border: none;
+    border: 1px solid rgba(234, 235, 235, 1);
+}
+.my-expenses-section .my-expenses-box .my-expenses-main-table .table {
+    width: 100%;
+    border-radius: 8px;
+    overflow: hidden;
+    border-collapse: collapse;
+}
+
+.my-expenses-section
+    .my-expenses-box
+    .my-expenses-main-table
+    .table
+    thead
+    tr
+    th {
+    text-align: left;
+    padding: 12px 20px;
+    background-color: rgba(5, 7, 74, 1);
+    color: rgba(234, 235, 235, 1);
+    font-weight: 400;
+    font-size: 16px;
+}
+.my-expenses-section
+    .my-expenses-box
+    .my-expenses-main-table
+    .table
+    tbody
+    tr
+    td {
+    padding: 16px 20px;
+    font-weight: 400;
+    font-size: 14px;
+    color: rgba(9, 13, 17, 1);
+    background-color: rgb(255, 255, 255);
+}
+.my-expenses-section
+    .my-expenses-box
+    .my-expenses-main-table
+    .table
+    tbody
+    tr
+    td {
+}
+.my-expenses-section
+    .my-expenses-box
+    .my-expenses-main-table
+    .table
+    tbody
+    tr
+    td.category {
+    font-weight: 500;
+    font-size: 16px;
+}
+.my-expenses-section
+    .my-expenses-box
+    .my-expenses-main-table
+    .table
+    tbody
+    tr
+    td.amount {
+    font-weight: 700;
+    font-size: 24px;
+    color: rgba(11, 56, 121, 1);
+}
+.my-expenses-section
+    .my-expenses-box
+    .my-expenses-main-table
+    .table
+    tbody
+    tr
+    td.date {
+    font-weight: 400;
+    font-size: 14px;
+}
+.my-expenses-section
+    .my-expenses-box
+    .my-expenses-main-table
+    .table
+    tbody
+    tr
+    td.action
+    .btns-block {
+    gap: 24px;
+}
+.my-expenses-section
+    .my-expenses-box
+    .my-expenses-main-table
+    .table
+    tbody
+    tr
+    td
+    button {
+    padding: 12px;
+    background-color: rgba(255, 255, 255, 1);
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    border: 1px solid rgba(234, 235, 235, 1);
+}
+
+.my-expenses-section .my-expenses-box .graphs-box {
+    background-color: rgba(255, 255, 255, 1);
+    padding: 30px 40px;
+    border-radius: 8px;
+    gap: 60px;
+    align-items: start;
+    justify-content: center;
+}
+
+.my-expenses-section .my-expenses-box .graphs-box .expenses-chart,
+.my-expenses-section .my-expenses-box .graphs-box .categories-box {
+    flex: 1;
+}
+.my-expenses-section .my-expenses-box .graphs-box .expenses-chart .chart-info {
+    gap: 10px;
+    flex-direction: column;
+}
+.my-expenses-section
+    .my-expenses-box
+    .graphs-box
+    .expenses-chart
+    .chart-info
+    .header-text {
+    font-weight: 500;
+    font-size: 24px;
+    color: rgba(9, 13, 17, 1);
+}
+.my-expenses-section
+    .my-expenses-box
+    .graphs-box
+    .expenses-chart
+    .chart-info
+    .info-text {
+    font-weight: 700;
+    font-size: 40px;
+    color: rgba(11, 56, 121, 1);
+}
+.my-expenses-section
+    .my-expenses-box
+    .graphs-box
+    .expenses-chart
+    .chart-info
+    .date-text {
+    font-weight: 400;
+    font-size: 18px;
+    color: rgba(9, 13, 17, 1);
+}
+.my-expenses-section .my-expenses-box .categories-box .categories-header {
+    padding: 20px;
+    background-color: rgba(5, 7, 74, 1);
+    border-radius: 8px 8px 0 0;
+}
+.my-expenses-section
+    .my-expenses-box
+    .categories-box
+    .categories-header
+    .category-header-text {
+    color: rgba(255, 255, 255, 1);
+    font-size: 20px;
+    font-weight: 500;
+}
+.my-expenses-section
+    .my-expenses-box
+    .categories-box
+    .categories-body
+    .categories-item {
+    padding: 20px;
+    border: 1px solid rgba(234, 235, 235, 1);
+    cursor: pointer;
+}
+.my-expenses-section
+    .my-expenses-box
+    .categories-box
+    .categories-body
+    .categories-item
+    .category-body-text {
+    font-weight: 400;
+    font-size: 18px;
+    color: rgba(9, 13, 17, 1);
+}
+.my-expenses-section
+    .my-expenses-box
+    .categories-box
+    .categories-body
+    .categories-item
+    .category-price-box {
+    gap: 24px;
+}
+.my-expenses-section
+    .my-expenses-box
+    .categories-box
+    .categories-body
+    .categories-item
+    .category-price-box
+    .category-price-text {
+    font-weight: 700;
+    font-size: 24px;
+    color: rgba(67, 187, 230, 1);
+}
+.header .responsive-nav-section {
+    gap: 180px;
+    width: 100%;
+    left: 25%;
+}
+.header .responsive-nav-section .nav-links-box {
+    position: relative;
+    left: 37%;
+}
+
+.add-new-expense-section {
+    width: 100%;
+    min-height: 100vh;
+    position: fixed;
+}
+.add-new-expense-section .shadow-box {
+    width: 100%;
+    height: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    background-color: rgba(55, 45, 45, 0.3);
+    z-index: -190909;
+}
+
+.add-new-expense-section .add-new-expense-box {
+    position: fixed;
+    right: 0;
+    top: 0;
+    background-color: rgba(255, 255, 255, 1);
+    height: 100%;
+}
+.add-new-expense-section .add-new-expense-box .expense-header,
+.add-new-expense-section .add-new-expense-box .add-new-expense-form-box {
+    padding: 20px;
+}
+.add-new-expense-section .add-new-expense-box .add-new-expense-form-box {
+    height: 94%;
+}
+.add-new-expense-section .add-new-expense-box .add-new-expense-forms-box {
+    flex-direction: column;
+    gap: 12px;
+}
+.add-new-expense-section .add-new-expense-box .expense-header {
+    background-color: rgba(5, 7, 74, 1);
+    color: rgba(255, 255, 255, 1);
+}
+.add-new-expense-section .add-new-expense-box .expense-header .close-icon {
+    cursor: pointer;
+}
+.add-new-expense-section
+    .add-new-expense-box
+    .expense-header
+    .expense-header-text {
+    font-size: 18px;
+    font-weight: 500;
+}
+.add-new-expense-section .add-new-expense-box .add-new-expense-input-box,
+.add-new-expense-section .add-new-expense-box .add-new-expense-form {
+    flex-direction: column;
+    gap: 12px;
+}
+.add-new-expense-section .add-new-expense-box .add-new-expense-form {
+    height: 100%;
+}
+.add-new-expense-section .add-new-expense-box .add-new-expense-input-box {
+    gap: 8px;
+}
+.add-new-expense-section
+    .add-new-expense-box
+    .add-new-expense-input-box
+    .add-new-expense-input-label {
+    text-transform: uppercase;
+    font-weight: 500;
+}
+.add-new-expense-section
+    .add-new-expense-box
+    .add-new-expense-input-box
+    textarea {
+    height: 100px;
+    resize: none;
+}
+
+.add-new-expense-section
+    .add-new-expense-box
+    .add-new-expense-input-box
+    .add-new-expense-input {
+    color: rgba(5, 7, 74, 1);
+    font-weight: 400;
+    text-transform: capitalize;
+}
+.add-new-expense-section .add-new-expense-box .add-new-expense-form-between {
+    flex-direction: column;
+}
+.add-new-expense-section .add-new-expense-box .add-new-expense-form-btns {
+}
+
+.footer-section .footer-box {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.navbar .nav-toggle {
+    display: none;
+}
+.navbar .nav-toggle svg {
+    cursor: pointer;
+}
+
+/* Main Section End */
+
+/* Media Start  */
+
+@media (max-width: 1392px) {
+    .px-primary {
+        padding: 0 64px;
+    }
+}
+@media (max-width: 1200px) {
+    .px-primary {
+        padding: 0 40px;
+    }
+    .header {
+        padding: 20px 0;
+    }
+    .banner-section .banner-box .empower-side .banner-main-text,
+    .company-info-section .info-side .company-info-main-text {
+        font-size: 48px;
+    }
+    .company-info-section
+        .company-info-box
+        .pictures-side
+        .second-pic-box
+        .info-box
+        p {
+        font-size: 20px;
+    }
+    .banner-section .banner-box .empower-side .info-text,
+    .company-info-section .info-side .info-text {
+        font-size: 16px;
+    }
+    .about-section .about-main-text {
+        font-size: 36px;
+    }
+    .company-info-section .company-info-box {
+        gap: 56px;
+    }
+    .about-section .about-main-box {
+        gap: 32px;
+    }
+
+    .my-expenses-section
+        .my-expenses-box
+        .graphs-box
+        .expenses-chart
+        .chart-info
+        .header-text {
+        font-size: 22px;
+    }
+    .my-expenses-section
+        .my-expenses-box
+        .graphs-box
+        .expenses-chart
+        .chart-info
+        .info-text {
+        font-size: 36px;
+    }
+    .my-expenses-section
+        .my-expenses-box
+        .graphs-box
+        .expenses-chart
+        .chart-info
+        .date-text {
+        font-size: 16px;
+    }
+    .my-expenses-section .my-expenses-box .graphs-box {
+        gap: 18px;
+    }
+
+    .my-expenses-section .my-expenses-box .graphs-box {
+        padding: 20px 30px;
+    }
+}
+
+@media (max-width: 1100px) {
+    .company-info-section .info-side,
+    .company-info-section .pictures-side {
+        width: 100%;
+    }
+    .company-info-section .company-info-box {
+        flex-direction: column;
+    }
+    .company-info-section .company-info-box {
+        text-align: center;
+    }
+    .company-info-section .company-info-box .info-side-box .btns-box {
+        text-align: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .trusted-section .trusted-box .trusted-companies-box {
+        flex-wrap: wrap;
+        gap: 32px;
+    }
+    .my-expenses-section .my-expenses-box .graphs-box {
+        gap: 24px;
+    }
+
+    .header .responsive-nav-section .nav-links-box {
+        position: relative;
+        left: 34%;
+    }
+}
+
+@media (max-width: 1069px) {
+    .my-expenses-section .my-expenses-box .graphs-box {
+        flex-direction: column;
+    }
+    .my-expenses-section .my-expenses-box .graphs-box .expenses-chart,
+    .my-expenses-section .my-expenses-box .graphs-box .categories-box {
+        width: 100%;
+    }
+    .my-expenses-section .my-expenses-box .graphs-box .expenses-chart {
+        justify-content: center;
+    }
+}
+@media (max-width: 969px) {
+    .px-primary {
+        padding: 0 28px;
+    }
+    .company-info-section .company-info-box {
+        /* flex-direction: row; */
+    }
+    .banner-section .banner-box .card-side {
+        display: none !important;
+    }
+    .banner-section .banner-box .empower-side {
+        width: 100%;
+        text-align: center;
+    }
+    .banner-section .banner-box .empower-side {
+        display: flex;
+        align-items: center;
+    }
+    .header .responsive-nav-section {
+        gap: 70px;
+    }
+
+    .header .responsive-nav-section .nav-links-box {
+        position: relative;
+        left: 30%;
+    }
+}
+
+@media (max-width: 780px) {
+    .header .responsive-nav-section {
+        position: fixed;
+        top: 0;
+        right: 0;
+        left: 0;
+        bottom: 0;
+        width: 100%;
+        background-color: rgba(11, 56, 121, 1);
+        color: white !important;
+        justify-content: center !important;
+        flex-direction: column;
+        gap: 24px;
+        transform: translateX(100%);
+        z-index: 2;
+        transition: transform 0.3s linear;
+    }
+    .header .responsive-nav-section .nav-links-box {
+        left: auto;
+    }
+    .header .responsive-nav-section.active {
+        transform: translateX(0);
+    }
+    .header .nav-links-box .nav-links {
+        display: flex;
+        flex-direction: column;
+    }
+    .header .nav-registration-btns-box {
+        flex-direction: column;
+    }
+    .header .nav-links-box .nav-links .nav-link,
+    .header .nav-registration-btns-box .login-btn {
+        color: rgba(255, 255, 255, 1);
+    }
+    .header .nav-registration-btns-box .login-btn:hover,
+    .header .nav-registration-btns-box button:hover {
+        transform: scale(1.05);
+    }
+    .navbar .nav-toggle {
+        display: inline;
+        z-index: 34;
+        color: rgba(11, 56, 121, 1);
+        transition: color 0.3s linear;
+    }
+    .navbar .nav-toggle.light {
+        color: rgba(255, 255, 255, 1);
+    }
+    .px-primary {
+        padding: 0 20px;
+    }
+    .banner-section .banner-box .empower-side .banner-main-text,
+    .company-info-section .info-side .company-info-main-text {
+        font-size: 32px;
+    }
+    .banner-section .banner-box .empower-side .info-text,
+    .company-info-section .info-side .info-text,
+    .trusted-section
+        .trusted-box
+        .trusted-companies-box
+        .trusted-company
+        .company-name-text,
+    .about-section .about-main-box .about-card .about-card-main p {
+        font-size: 14px;
+    }
+    .banner-section .banner-box .empower-side,
+    .company-info-section .info-side .info-side-box {
+        gap: 16px !important;
+    }
+    .about-section
+        .about-main-box
+        .about-card
+        .about-card-header
+        .about-card-header-text,
+    .my-expenses-section
+        .my-expenses-box
+        .graphs-box
+        .expenses-chart
+        .chart-info
+        .info-text {
+        font-size: 24px;
+    }
+    .about-section .about-main-box .about-card .about-card-header {
+        margin-bottom: 24px;
+    }
+    .about-section .about-main-box .about-card {
+        height: auto;
+    }
+    .company-info-section
+        .company-info-box
+        .pictures-side
+        .second-pic-box
+        .info-box
+        p {
+        font-size: 18px;
+    }
+    .footer
+        .footer-section
+        .footer-box
+        .footer-links-box
+        .footer-quick-links-box
+        h2,
+    .my-expenses-section
+        .my-expenses-box
+        .categories-box
+        .categories-body
+        .categories-item
+        .category-price-box
+        .category-price-text,
+    .my-expenses-section
+        .my-expenses-box
+        .graphs-box
+        .expenses-chart
+        .chart-info
+        .header-text {
+        font-size: 16px;
+    }
+    .footer
+        .footer-section
+        .footer-box
+        .footer-links-box
+        .footer-quick-links-box
+        .footer-quick-links
+        .footer-quick-link,
+    .my-expenses-section
+        .my-expenses-box
+        .categories-box
+        .categories-body
+        .categories-item
+        .category-body-text {
+        font-size: 14px;
+    }
+    .about-section .about-main-box .about-card {
+        width: 100%;
+    }
+    .about-section .about-main-text {
+        font-size: 24px;
+        width: 100%;
+    }
+    .footer-section .footer-box .footer-social {
+        flex-wrap: wrap;
+        flex-direction: column;
+        text-align: center;
+        gap: 24px;
+    }
+    .footer-section .footer-box {
+        flex-wrap: wrap;
+    }
+    .footer-section .footer-box .footer-links-box {
+        flex-wrap: wrap;
+    }
+    .footer-section .footer-box,
+    .footer-section .footer-box .footer-links-box {
+        gap: 24px;
+    }
+    .footer .footer-section .footer-box .footer-links-box {
+        justify-content: center !important;
+    }
+    .footer
+        .footer-section
+        .footer-box
+        .footer-links-box
+        .footer-quick-links-box
+        h2 {
+        text-align: center;
+    }
+    .my-expenses-section
+        .my-expenses-box
+        .my-expenses-header
+        .my-expenses-header-text {
+        font-size: 32px;
+    }
+    .login-section .login-box .login-header .sign-in-text {
+        text-align: center;
+        font-size: 40px;
+    }
+    .login-section .login-box .login-header .login-info-text,
+    .my-expenses-section
+        .my-expenses-box
+        .categories-box
+        .categories-header
+        .category-header-text {
+        font-size: 16px;
+    }
+    .login-section .login-box .login-header,
+    .my-expenses-section
+        .my-expenses-box
+        .graphs-box
+        .expenses-chart
+        .chart-info
+        .date-text {
+        gap: 14px;
+    }
+    .login-section .login-box .login-form {
+        gap: 16px;
+    }
+    .login-section .login-box {
+        gap: 40px;
+    }
+
+    .my-expenses-section
+        .my-expenses-box
+        .my-expenses-main-table
+        .table
+        tbody
+        tr
+        td.amount,
+    .my-expenses-section
+        .my-expenses-box
+        .my-expenses-main
+        .my-expenses-main-tabs
+        .tab-btn {
+        font-size: 18px;
+    }
+    .my-expenses-section
+        .my-expenses-box
+        .my-expenses-main-table
+        .table
+        tbody
+        tr
+        td.category,
+    .my-expenses-section
+        .my-expenses-box
+        .my-expenses-main-table
+        .table
+        thead
+        tr
+        th,
+    .my-expenses-section .my-expenses-box .my-expenses-main select,
+    .add-new-expense-section
+        .add-new-expense-box
+        .add-new-expense-input-box
+        select,
+    .add-new-expense-section
+        .add-new-expense-box
+        .add-new-expense-input-box
+        textarea {
+        font-size: 14px;
+    }
+    .my-expenses-section
+        .my-expenses-box
+        .my-expenses-main-table
+        .table
+        tbody
+        tr
+        td.date,
+    .my-expenses-section
+        .my-expenses-box
+        .my-expenses-main-table
+        .table
+        tbody
+        tr
+        td {
+        font-size: 12px;
+    }
+    .my-expenses-section
+        .my-expenses-box
+        .my-expenses-main-table
+        .table
+        tbody
+        tr
+        td
+        button {
+        padding: 8px;
+    }
+    .my-expenses-section
+        .my-expenses-box
+        .my-expenses-main-table
+        .table
+        tbody
+        tr
+        td {
+        padding: 12px 15px;
+    }
+    .my-expenses-section
+        .my-expenses-box
+        .my-expenses-main-table
+        .table
+        tbody
+        tr
+        td.action {
+        gap: 12px;
+    }
+    .my-expenses-section
+        .my-expenses-box
+        .my-expenses-header
+        .my-expenses-header-box {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    .my-expenses-section {
+        padding: 54px 0;
+    }
+    .my-expenses-section .my-expenses-box .my-expenses-header {
+        gap: 16px;
+    }
+    .my-expenses-section .my-expenses-box {
+        gap: 54px;
+    }
+    .my-expenses-section
+        .my-expenses-box
+        .my-expenses-main
+        .my-expenses-main-header {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    .my-expenses-section .my-expenses-box .my-expenses-main {
+        gap: 24px;
+    }
+    .my-expenses-section
+        .my-expenses-box
+        .my-expenses-header
+        .my-expenses-header-box
+        .my-expenses-header-input-box {
+        width: 100%;
+    }
+    .my-expenses-section
+        .my-expenses-box
+        .my-expenses-header
+        .my-expenses-header-box
+        .my-expenses-header-input,
+    .add-new-expense-section
+        .add-new-expense-box
+        .add-new-expense-input-box
+        input {
+        width: 100%;
+    }
+    .my-expenses-section
+        .my-expenses-box
+        .my-expenses-main
+        .my-expenses-main-table {
+        border-radius: 8px;
+    }
+    .header .responsive-nav-section {
+        gap: 30px;
+    }
+}
+
+@media (max-width: 500px) {
+    .company-info-section .company-info-box .pictures-side {
+        display: flex;
+        flex-direction: column;
+    }
+    .px-primary {
+        padding: 0 8px;
+    }
+    .company-info-section
+        .company-info-box
+        .pictures-side
+        .second-pic-box
+        .info-box
+        p {
+        font-size: 18px;
+    }
+    .about-section,
+    .company-info-section {
+        margin-top: 40px;
+    }
+    .about-section .about-box {
+        gap: 24px;
+    }
+    .footer-section .footer-box .footer-links-box {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    .footer-section .footer-box .footer-social {
+        flex-direction: column;
+        text-align: center;
+        gap: 24px;
+    }
+    .footer
+        .footer-section
+        .footer-box
+        .footer-social
+        .footer-info
+        .footer-social-text {
+        text-align: center;
+    }
+    .footer-section .footer-box,
+    .footer-section .footer-box .footer-links-box {
+        gap: 24px;
+    }
+    .footer .footer-section .footer-box .footer-links-box {
+        display: flex;
+        align-items: center;
+        justify-content: center !important;
+    }
+    .footer .footer-section .footer-box .footer-links-box .footer-gmail {
+        justify-content: center;
+    }
+    .footer
+        .footer-section
+        .footer-box
+        .footer-links-box
+        .footer-quick-links-box
+        h2 {
+        text-align: center;
+    }
+    .about-section .about-main-box .about-card {
+        padding: 16px 12px;
+    }
+    .banner-section .banner-box .empower-side .banner-main-text,
+    .company-info-section .info-side .company-info-main-text {
+        font-size: 28px;
+    }
+    .about-section .about-main-text {
+        font-size: 20px;
+    }
+    .about-section .about-main-box .about-card .about-card-header {
+        margin-bottom: 16px;
+    }
+    .about-section .about-main-box {
+        gap: 16px;
+    }
+    .header .nav-registration-btns-box button.get-started-btn,
+    .banner-section .banner-box .empower-side .login-btn.get-started,
+    .company-info-section .info-side .login-btn.get-started,
+    .my-expenses-section .my-expenses-header-btns .my-expenses-btn,
+    .add-new-expense-section
+        .add-new-expense-box
+        .add-new-expense-form-btns
+        .add-new-expense-btn.save {
+        font-size: 12px;
+    }
+    .header .nav-registration-btns-box button,
+    .header .nav-registration-btns-box .login-btn,
+    .banner-section .banner-box .empower-side .login-btn,
+    .company-info-section .info-side .login-btn,
+    .my-expenses-section .my-expenses-header-btns .my-expenses-btn,
+    .add-new-expense-section
+        .add-new-expense-box
+        .add-new-expense-form-btns
+        .add-new-expense-btn {
+        font-size: 12px;
+    }
+    .trusted-section .trusted-main-text {
+        font-size: 20px;
+    }
+    .login-section .login-box .login-header .sign-in-text {
+        text-align: center;
+        font-size: 28px;
+    }
+    .my-expenses-section
+        .my-expenses-box
+        .my-expenses-main-table
+        .table
+        tbody
+        tr
+        td.amount,
+    .my-expenses-section
+        .my-expenses-box
+        .my-expenses-main
+        .my-expenses-main-tabs
+        .tab-btn {
+        font-size: 16px;
+    }
+    .login-section .login-box .login-header .login-info-text,
+    .login-section .login-box .login-form .login-input-box .forgot-password,
+    .login-section .login-box .login-form .login-input-btns .question-text,
+    .login-section .login-box .login-form .login-input-box .login-input,
+    .login-section
+        .login-box
+        .login-form
+        .login-input-btns
+        .question-text
+        .account-creation-btn {
+        font-size: 14px;
+    }
+    .login-section .login-box .login-form .login-input-btns .btn-login,
+    .login-section
+        .login-box
+        .login-form
+        .login-input-box
+        .login-input-box-label {
+        font-size: 12px;
+    }
+    .login-section .login-box .login-header {
+        gap: 8px;
+    }
+    .my-expenses-section .my-expenses-box {
+        gap: 32px;
+    }
+    .my-expenses-section {
+        padding: 32px 0;
+    }
+    .my-expenses-section
+        .my-expenses-box
+        .my-expenses-main
+        .my-expenses-main-table {
+        overflow-x: scroll;
+    }
+    .my-expenses-section
+        .my-expenses-box
+        .my-expenses-header
+        .my-expenses-header-text {
+        font-size: 30px;
+    }
+    .my-expenses-section
+        .my-expenses-box
+        .my-expenses-header
+        .my-expenses-header-box
+        .my-expenses-header-input,
+    .add-new-expense-section
+        .add-new-expense-box
+        .add-new-expense-input-box
+        input,
+    .header .nav-registration-btns-box button.get-started-btn,
+    .banner-section .banner-box .empower-side .login-btn.get-started,
+    .company-info-section .info-side .login-btn.get-started,
+    .my-expenses-section .my-expenses-header-btns .my-expenses-btn,
+    .add-new-expense-section
+        .add-new-expense-box
+        .add-new-expense-form-btns
+        .add-new-expense-btn.save,
+    .add-new-expense-section
+        .add-new-expense-box
+        .add-new-expense-input-box
+        .add-new-expense-input-label {
+        font-size: 14px;
+    }
+    .my-expenses-section .my-expenses-box .graphs-box {
+        padding: 12px 18px;
+    }
+    .my-expenses-section
+        .my-expenses-box
+        .my-expenses-main
+        .my-expenses-main-header
+        .my-expenses-main-drop-down {
+        width: 100%;
+    }
+    .my-expenses-section .my-expenses-box .my-expenses-main select {
+        width: 100%;
+    }
+
+    .my-expenses-section .my-expenses-box .graphs-box .expenses-chart {
+        flex-wrap: wrap;
+    }
+    .my-expenses-section
+        .my-expenses-box
+        .graphs-box
+        .expenses-chart
+        .chart-info {
+        text-align: center;
+    }
+    .my-expenses-section .my-expenses-box .graphs-box {
+        padding: 4px 8px;
+    }
+    .add-new-expense-section .add-new-expense-box .add-new-expense-form-box {
+        width: 100%;
+    }
+    .add-new-expense-section .add-new-expense-box {
+        width: 100%;
+    }
+    .add-new-expense-section
+        .add-new-expense-box
+        .expense-header
+        .expense-header-text {
+        font-size: 16px;
+    }
+}
+
+/* Media End  */
