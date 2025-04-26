@@ -89,7 +89,6 @@ class Category(models.Model):
         return self.name
 
 
-# Fix for the Expense model
 class Expense(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='expenses')
     title = models.CharField(max_length=200)
@@ -180,4 +179,22 @@ class PlaidTransaction(models.Model):
     class Meta:
         ordering = ['-date']
 
+
+class Budget(models.Model):
+    PERIOD_CHOICES = (
+        ('daily', 'Daily'),
+        ('weekly', 'Weekly'),
+        ('monthly', 'Monthly'),
+    )
     
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='budgets')
+    period = models.CharField(max_length=10, choices=PERIOD_CHOICES)
+    amount = models.DecimalField(max_digits=12, decimal_places=2)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        unique_together = ('user', 'period')
+        
+    def __str__(self):
+        return f"{self.user.email} - {self.get_period_display()} Budget: ${self.amount}"

@@ -11,6 +11,14 @@ from .serializers import (
     ExpenseSerializer
 )
 from .models import Category, Expense
+from rest_framework.decorators import action
+from .models import Budget, Expense
+from .serializers import BudgetSerializer
+from datetime import datetime, timedelta
+from django.utils import timezone
+from django.db.models import Sum
+from django.db import transaction
+
 
 
 class CustomTokenObtainPairView(TokenObtainPairView):
@@ -347,3 +355,154 @@ def sync_transactions_endpoint(request):
         return Response({"success": True, "message": "Transactions synced successfully"})
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+
+
+class BudgetViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet for viewing and editing user budgets
+    """
+    serializer_class = BudgetSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    
+    def get_queryset(self):
+        """
+        Return budgets for the currently authenticated user
+        """
+        return Budget.objects.filter(user=self.request.user)
+    
+    def perform_create(self, serializer):
+        """
+        Create a new budget or update existing one
+        """
+        serializer.save(user=self.request.user)
+    
+    @action(detail=False, methods=['get'])
+    def summary(self, request):
+        """
+        Get budget summary including current spending against budgets
+        """
+        user = request.user
+        today = timezone.now().date()
+        
+        # Get budget limits
+        budgets = {
+            'daily': None,
+            'weekly': None,
+            'monthly': None
+        }
+        
+        for budget in self.get_queryset():
+            budgets[budget.period] = float(budget.amount)
+        
+        # Calculate periods
+        start_of_day = datetime.combine(today, datetime.min.time())
+        start_of_week = (today - timedelta(days=today.weekday())).replace(hour=0, minute=0, second=0)
+        start_of_month = today.replace(day=1, hour=0, minute=0, second=0)
+        
+        # Get spending for each period
+        daily_spending = Expense.objects.filter(
+            user=user, date=today
+        ).aggregate(total=Sum('amount'))['total'] or 0
+        
+        weekly_spending = Expense.objects.filter(
+            user=user, date__gte=start_of_week, date__lte=today
+        ).aggregate(total=Sum('amount'))['total'] or 0
+        
+        monthly_spending = Expense.objects.filter(
+            user=user, date__gte=start_of_month, date__lte=today
+        ).aggregate(total=Sum('amount'))['total'] or 0
+        
+        # Calculate percentages
+        daily_percentage = (float(daily_spending) / budgets['daily'] * 100) if budgets['daily'] else 0
+        weekly_percentage = (float(weekly_spending) / budgets['weekly'] * 100) if budgets['weekly'] else 0
+        monthly_percentage = (float(monthly_spending) / budgets['monthly'] * 100) if budgets['monthly'] else 0
+        
+        # Prepare category breakdown for the current month
+        category_breakdown = []
+        
+        category_totals = Expense.objects.filter(
+            user=user, date__gte=start_of_month, date__lte=today
+        ).values('category').annotate(total=Sum('amount'))
+        
+        for item in category_totals:
+            if item['category'] is not None:
+                try:
+                    category = Category.objects.get(id=item['category'])
+                    category_breakdown.append({
+                        'category_id': category.id,
+                        'name': category.name,
+                        'icon': category.icon,
+                        'color': category.color,
+                        'amount': float(item['total']),
+                        'percentage': float(item['total']) / float(monthly_spending) * 100 if monthly_spending else 0
+                    })
+                except Category.DoesNotExist:
+                    pass
+        
+        return Response({
+            'budgets': {
+                'daily': budgets['daily'],
+                'weekly': budgets['weekly'],
+                'monthly': budgets['monthly']
+            },
+            'spending': {
+                'daily': float(daily_spending),
+                'weekly': float(weekly_spending),
+                'monthly': float(monthly_spending)
+            },
+            'percentages': {
+                'daily': daily_percentage,
+                'weekly': weekly_percentage,
+                'monthly': monthly_percentage
+            },
+            'category_breakdown': category_breakdown
+        })
+        
+    @action(detail=False, methods=['post'])
+    def set_budgets(self, request):
+        """
+        Set all budget periods at once
+        """
+        data = request.data
+        user = request.user
+        
+        required_periods = ['daily', 'weekly', 'monthly']
+        for period in required_periods:
+            if period not in data:
+                return Response(
+                    {f"{period}": ["This field is required."]},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+        
+        with transaction.atomic():
+            for period in required_periods:
+                amount = data.get(period)
+                try:
+                    amount = float(amount)
+                    if amount <= 0:
+                        return Response(
+                            {period: ["Budget amount must be greater than zero."]},
+                            status=status.HTTP_400_BAD_REQUEST
+                        )
+                except (ValueError, TypeError):
+                    return Response(
+                        {period: ["Must be a valid number."]},
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+                
+                budget, created = Budget.objects.update_or_create(
+                    user=user,
+                    period=period,
+                    defaults={'amount': amount}
+                )
+        
+        return Response({
+            'message': 'All budgets updated successfully',
+            'budgets': {
+                'daily': float(data.get('daily')),
+                'weekly': float(data.get('weekly')),
+                'monthly': float(data.get('monthly'))
+            }
+        })

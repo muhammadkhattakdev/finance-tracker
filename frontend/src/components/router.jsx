@@ -9,6 +9,7 @@ import DashboardLayout from "./layouts/dashboardLayout/layout";
 import DashboardHomepage from "./pages/dashboardPages/dashboardHomepage/dashboardHomepage";
 import ExpensesPage from "./pages/dashboardPages/expensesPage/expensesPage";
 import BankConnectionPage from "./pages/dashboardPages/connectBankPage/connectBankPage";
+import AnalyticsPage from "./pages/dashboardPages/analyticsPage/analyticsPage";
 
 export default function Router() {
     return (
@@ -19,12 +20,13 @@ export default function Router() {
                     <Route path="login" element={<LoginPage />} />
                     <Route path="register" element={<RegisterPage />} />
                 </Route>
-                
+
                 <Route element={<ProtectedRoute />}>
                     <Route path="dashboard" element={<DashboardLayout />}>
                         <Route index element={<DashboardHomepage />} />
                         <Route path="expenses" element={<ExpensesPage />} />
                         <Route path="banks" element={<BankConnectionPage />} />
+                        <Route path="analytics" element={<AnalyticsPage />} />
                     </Route>
                 </Route>
                 

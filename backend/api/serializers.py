@@ -3,6 +3,8 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from .models import generate_unique_username, Category, Expense
+from .models import PlaidItem, PlaidAccount, PlaidTransaction
+
 
 User = get_user_model()
 
@@ -86,10 +88,7 @@ class ExpenseSerializer(serializers.ModelSerializer):
         return super().create(validated_data)
 
 
-# Add this to your existing serializers.py file
 
-from rest_framework import serializers
-from .models import PlaidItem, PlaidAccount, PlaidTransaction
 
 class PlaidAccountSerializer(serializers.ModelSerializer):
     type_display = serializers.CharField(source='get_type_display', read_only=True)
@@ -135,3 +134,21 @@ class PlaidTransactionSerializer(serializers.ModelSerializer):
             'payment_meta', 'created_at', 'updated_at'
         ]
         read_only_fields = ['id', 'transaction_id']
+
+
+from rest_framework import serializers
+from .models import Budget
+
+class BudgetSerializer(serializers.ModelSerializer):
+    period_display = serializers.CharField(source='get_period_display', read_only=True)
+    
+    class Meta:
+        model = Budget
+        fields = ['id', 'period', 'period_display', 'amount', 'created_at', 'updated_at']
+        read_only_fields = ['id', 'created_at', 'updated_at']
+
+    def validate(self, attrs):
+        # Ensure amount is positive
+        if attrs.get('amount', 0) <= 0:
+            raise serializers.ValidationError({'amount': 'Budget amount must be greater than zero.'})
+        return attrs

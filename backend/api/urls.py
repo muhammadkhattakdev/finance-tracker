@@ -1,6 +1,7 @@
 from django.urls import path, include
 from rest_framework_simplejwt.views import TokenRefreshView
 from rest_framework.routers import DefaultRouter
+from .views import BudgetViewSet
 from .views import (
     CustomTokenObtainPairView,
     RegisterView,
@@ -22,6 +23,8 @@ router.register(r'expenses', ExpenseViewSet, basename='expense')
 # Add Plaid ViewSets to the router
 router.register(r'plaid/items', PlaidItemViewSet, basename='plaid-item')
 router.register(r'plaid/accounts', PlaidAccountViewSet, basename='plaid-account')
+router.register(r'budgets', BudgetViewSet, basename='budget')
+
 
 urlpatterns = [
     # Auth endpoints

@@ -48,60 +48,65 @@ const BankIcon = () => (
     height="24"
     viewBox="0 0 24 24"
     fill="none"
+    
     xmlns="http://www.w3.org/2000/svg"
   >
     <path
       d="M3 21H21"
-      className="bank-icon-path"
+    className="sidebar-icon-path"
       strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
     />
     <path
       d="M3 10H21"
-      className="bank-icon-path"
+
+      className="sidebar-icon-path"
       strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
     />
     <path
       d="M5 6L12 3L19 6"
-      className="bank-icon-path"
+      className="sidebar-icon-path"
       strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
     />
     <path
       d="M4 10V21"
-      className="bank-icon-path"
+    className="sidebar-icon-path"
+      
       strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
     />
     <path
       d="M20 10V21"
-      className="bank-icon-path"
+    className="sidebar-icon-path"
+      
       strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
     />
     <path
       d="M8 14V17"
-      className="bank-icon-path"
+    className="sidebar-icon-path"
+      
       strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
     />
     <path
       d="M12 14V17"
-      className="bank-icon-path"
+      className="sidebar-icon-path"
       strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
     />
     <path
       d="M16 14V17"
-      className="bank-icon-path"
+      className="sidebar-icon-path"
       strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
@@ -147,6 +152,45 @@ const ExpensesIcon = () => (
     />
     <path
       d="M20 10V17"
+      className="sidebar-icon-path"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
+const AnalyticsIcon = () => (
+  <svg
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path
+      d="M18 20V10"
+      className="sidebar-icon-path"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <path
+      d="M12 20V4"
+      className="sidebar-icon-path"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <path
+      d="M6 20V14"
+      className="sidebar-icon-path"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <path
+      d="M2 20H22"
       className="sidebar-icon-path"
       strokeWidth="2"
       strokeLinecap="round"
@@ -313,11 +357,11 @@ const Sidebar = ({ mobileOpen, setMobileOpen, collapsed, toggleSidebar }) => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Navigation items
   const navItems = [
     { path: "/dashboard", name: "Dashboard", icon: <DashboardIcon /> },
     { path: "/dashboard/expenses", name: "Expenses", icon: <ExpensesIcon /> },
-    { path: "/transactions", name: "Transactions", icon: <TransactionsIcon /> },
+    { path: "/dashboard/analytics", name: "Expense Analytics", icon: <AnalyticsIcon /> },
+    { path: "/dashboard/banks", name: "Connect to Bank", icon: <BankIcon /> },
     { path: "/history", name: "History", icon: <HistoryIcon /> },
     { path: "/profile", name: "Profile", icon: <ProfileIcon /> },
     { path: "/settings", name: "Settings", icon: <SettingsIcon /> },
