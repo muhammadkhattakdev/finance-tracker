@@ -198,3 +198,28 @@ class Budget(models.Model):
         
     def __str__(self):
         return f"{self.user.email} - {self.get_period_display()} Budget: ${self.amount}"
+
+
+# Add to models.py
+
+class Notification(models.Model):
+    NOTIFICATION_TYPES = (
+        ('budget_exceed', 'Budget Exceeded'),
+        ('budget_near', 'Budget Nearly Exceeded'),
+        ('weekly_summary', 'Weekly Summary'),
+        ('system', 'System Notification'),
+    )
+    
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications')
+    type = models.CharField(max_length=20, choices=NOTIFICATION_TYPES)
+    title = models.CharField(max_length=100)
+    message = models.TextField()
+    is_read = models.BooleanField(default=False)
+    related_data = models.JSONField(null=True, blank=True)  # Store related budget, expense ID, etc.
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        ordering = ['-created_at']
+    
+    def __str__(self):
+        return f"{self.title} - {self.user.email}"

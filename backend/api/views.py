@@ -2,15 +2,27 @@ from rest_framework import status, generics, permissions, viewsets, filters
 from rest_framework.response import Response
 from rest_framework_simplejwt.views import TokenObtainPairView
 from django_filters.rest_framework import DjangoFilterBackend
-from .serializers import (
-    CustomTokenObtainPairSerializer,
-    RegisterSerializer,
-    UserSerializer,
-    UserUpdateSerializer,
-    CategorySerializer,
-    ExpenseSerializer
-)
-from .models import Category, Expense
+from .serializers import *
+from .models import *
+from rest_framework import viewsets, permissions, status
+from rest_framework.response import Response
+from rest_framework.decorators import action
+from datetime import datetime, timedelta
+from django.utils import timezone
+from django.db.models import Sum
+import plaid
+from plaid.api import plaid_api
+from plaid.model.link_token_create_request import LinkTokenCreateRequest
+from plaid.model.link_token_create_request_user import LinkTokenCreateRequestUser
+from plaid.model.item_public_token_exchange_request import ItemPublicTokenExchangeRequest
+from plaid.model.products import Products
+from plaid.model.country_code import CountryCode
+from plaid.model.accounts_get_request import AccountsGetRequest
+from plaid.model.transactions_sync_request import TransactionsSyncRequest
+from rest_framework.views import APIView
+from rest_framework.decorators import api_view, permission_classes
+
+
 
 
 class CustomTokenObtainPairView(TokenObtainPairView):
@@ -82,35 +94,52 @@ class ExpenseViewSet(viewsets.ModelViewSet):
         return Expense.objects.filter(user=self.request.user)
 
 
+    def perform_create(self, serializer):
+        """
+        Create a new expense and check for large expense notifications
+        """
+        expense = serializer.save(user=self.request.user)
+        
+        category_name = "Uncategorized"
+        if expense.category:
+            category_name = expense.category.name
+        
+        large_expense_threshold = 100.0
+        
+        if expense.amount >= large_expense_threshold:
+            Notification.objects.create(
+                user=self.request.user,
+                type='system',
+                title="Large Expense Added",
+                message=f"You've added a large expense of ${expense.amount:.2f} in the {category_name} category.",
+                related_data={
+                    'expense_id': expense.id,
+                    'amount': float(expense.amount),
+                    'category': category_name,
+                    'date': expense.date.strftime('%Y-%m-%d')
+                }
+            )
+        
+        try:
+            from django.urls import reverse
+            from rest_framework.test import APIRequestFactory
+            
+            factory = APIRequestFactory()
+            request = factory.get(reverse('budget-summary'))
+            request.user = self.request.user
+            
+            from .views import BudgetViewSet
+            view = BudgetViewSet.as_view({'get': 'summary'})
+            view(request)
+        except Exception as e:
+            print(f"Error checking budget limits: {str(e)}")
 
 
 
 
-# Add this to your existing views.py file
 
-import os
-import plaid
-import datetime
-from plaid.api import plaid_api
-from plaid.model.link_token_create_request import LinkTokenCreateRequest
-from plaid.model.link_token_create_request_user import LinkTokenCreateRequestUser
-from plaid.model.item_public_token_exchange_request import ItemPublicTokenExchangeRequest
-from plaid.model.products import Products
-from plaid.model.country_code import CountryCode
-from plaid.model.accounts_get_request import AccountsGetRequest
-from plaid.model.transactions_sync_request import TransactionsSyncRequest
-from rest_framework import status, viewsets, permissions
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework.decorators import api_view, permission_classes
-from .models import PlaidItem, PlaidAccount, PlaidTransaction, Expense, Category
-from .serializers import (
-    PlaidItemSerializer, PlaidAccountSerializer, 
-    PlaidLinkTokenSerializer, PlaidPublicTokenSerializer,
-    PlaidTransactionSerializer
-)
 
-# Initialize Plaid client
+
 configuration = plaid.Configuration(
     host=plaid.Environment.Sandbox,
     api_key={
@@ -126,10 +155,8 @@ class CreateLinkTokenView(APIView):
     
     def post(self, request):
         try:
-            # Create a Link token for the given user
             user = request.user
             
-            # Create a link_token using the client
             request_user = LinkTokenCreateRequestUser(
                 client_user_id=str(user.id)
             )
@@ -140,7 +167,7 @@ class CreateLinkTokenView(APIView):
                 products=[Products('transactions')],
                 country_codes=[CountryCode('US')],
                 language='en',
-                webhook='https://yourwebsite.com/webhook'  # Optional, for real deployment
+                webhook='https://yourwebsite.com/webhook'
             )
             
             response = plaid_client.link_token_create(request_model)
@@ -174,7 +201,6 @@ class ExchangePublicTokenView(APIView):
             institution_id = serializer.validated_data.get('institution_id')
             institution_name = serializer.validated_data.get('institution_name')
             
-            # Exchange public token for an access token
             exchange_request = ItemPublicTokenExchangeRequest(
                 public_token=public_token
             )
@@ -182,7 +208,6 @@ class ExchangePublicTokenView(APIView):
             access_token = exchange_response['access_token']
             item_id = exchange_response['item_id']
             
-            # Create or update PlaidItem
             plaid_item, created = PlaidItem.objects.update_or_create(
                 user=request.user,
                 institution_id=institution_id,
@@ -193,11 +218,9 @@ class ExchangePublicTokenView(APIView):
                 }
             )
             
-            # Fetch accounts
             accounts_request = AccountsGetRequest(access_token=access_token)
             accounts_response = plaid_client.accounts_get(accounts_request)
             
-            # Save accounts to database
             for account_data in accounts_response['accounts']:
                 balances = account_data['balances']
                 
@@ -216,7 +239,6 @@ class ExchangePublicTokenView(APIView):
                     }
                 )
             
-            # Initial transaction sync
             self.sync_transactions(plaid_item)
             
             return Response({
@@ -239,15 +261,13 @@ class ExchangePublicTokenView(APIView):
     def sync_transactions(self, plaid_item):
         """Sync transactions for a specific PlaidItem"""
         try:
-            # Get all transactions for the item
             request = TransactionsSyncRequest(
                 access_token=plaid_item.access_token,
-                cursor=None  # For initial sync, cursor is None
+                cursor=None
             )
             
             response = plaid_client.transactions_sync(request)
             
-            # Process added transactions
             self.process_transactions(response['added'], plaid_item)
             
             # Store cursor for future syncs (in a real implementation)
@@ -259,25 +279,21 @@ class ExchangePublicTokenView(APIView):
     
     def process_transactions(self, transactions, plaid_item):
         """Process and save transactions to the database"""
-        # Get or create a default category for Plaid transactions
         default_category, _ = Category.objects.get_or_create(
             name="Uncategorized",
             defaults={"icon": "📋", "color": "#9E9E9E"}
         )
         
         for transaction in transactions:
-            # Skip pending transactions
             if transaction.get('pending', True):
                 continue
             
             try:
-                # Get account
                 account = PlaidAccount.objects.get(
                     plaid_item=plaid_item,
                     account_id=transaction['account_id']
                 )
                 
-                # Create or update transaction
                 plaid_transaction, created = PlaidTransaction.objects.update_or_create(
                     transaction_id=transaction['transaction_id'],
                     defaults={
@@ -295,7 +311,6 @@ class ExchangePublicTokenView(APIView):
                     }
                 )
                 
-                # Create corresponding expense if this is a new transaction
                 if created:
                     expense = Expense.objects.create(
                         user=plaid_item.user,
@@ -307,7 +322,6 @@ class ExchangePublicTokenView(APIView):
                         source='plaid'
                     )
                     
-                    # Link expense to transaction
                     plaid_transaction.expense = expense
                     plaid_transaction.save()
                 
@@ -341,7 +355,6 @@ def sync_transactions_endpoint(request):
             return Response({"error": "No connected bank accounts found"}, status=status.HTTP_404_NOT_FOUND)
         
         for item in items:
-            # Implementation similar to sync_transactions method in ExchangePublicTokenView
             pass
             
         return Response({"success": True, "message": "Transactions synced successfully"})
@@ -349,57 +362,82 @@ def sync_transactions_endpoint(request):
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-# Add to your views.py file
 
-from rest_framework import viewsets, permissions, status
-from rest_framework.response import Response
-from rest_framework.decorators import action
-from .models import Budget, Expense
-from .serializers import BudgetSerializer
-from datetime import datetime, timedelta
-from django.utils import timezone
-from django.db.models import Sum
-from django.db import transaction
+
 @api_view(['POST'])
 @permission_classes([permissions.IsAuthenticated])
 def sync_transactions_endpoint(request):
     """Manually trigger transaction sync for all connected accounts"""
     try:
         items = PlaidItem.objects.filter(user=request.user)
+        
         if not items:
             return Response({"error": "No connected bank accounts found"}, status=status.HTTP_404_NOT_FOUND)
         
         for item in items:
             try:
-                # Implementation of sync_transactions
                 access_token = item.access_token
                 request_obj = TransactionsSyncRequest(
                     access_token=access_token,
-                    cursor=None  # For a fresh sync, you might want to implement cursor storage
+                    cursor=""  # Use empty string instead of None
                 )
                 
                 response = plaid_client.transactions_sync(request_obj)
                 
-                # Process the added transactions (similar to ExchangePublicTokenView)
+                # Convert response to serializable format
                 added_transactions = response['added']
+                
                 default_category, _ = Category.objects.get_or_create(
                     name="Uncategorized",
                     defaults={"icon": "📋", "color": "#9E9E9E"}
                 )
                 
                 for transaction in added_transactions:
-                    # Skip pending transactions
                     if transaction.get('pending', True):
                         continue
                     
                     try:
-                        # Get account
                         account = PlaidAccount.objects.get(
                             plaid_item=item,
                             account_id=transaction['account_id']
                         )
                         
-                        # Create or update transaction
+                        # Safely handle location data
+                        location_data = {}
+                        if 'location' in transaction:
+                            try:
+                                # Try to convert to dict if it's an object
+                                if hasattr(transaction['location'], 'to_dict'):
+                                    location_data = transaction['location'].to_dict()
+                                elif hasattr(transaction['location'], '__dict__'):
+                                    location_data = transaction['location'].__dict__
+                                else:
+                                    # If it's already a simple type like dict, use it directly
+                                    location_data = dict(transaction['location'])
+                            except:
+                                # If conversion fails, use empty dict
+                                location_data = {}
+                        
+                        # Safely handle payment_meta data
+                        payment_meta_data = {}
+                        if 'payment_meta' in transaction:
+                            try:
+                                if hasattr(transaction['payment_meta'], 'to_dict'):
+                                    payment_meta_data = transaction['payment_meta'].to_dict()
+                                elif hasattr(transaction['payment_meta'], '__dict__'):
+                                    payment_meta_data = transaction['payment_meta'].__dict__
+                                else:
+                                    payment_meta_data = dict(transaction['payment_meta'])
+                            except:
+                                payment_meta_data = {}
+                        
+                        category_data = transaction.get('category', [])
+                        if not isinstance(category_data, list):
+                            try:
+                                category_data = list(category_data)
+                            except:
+                                category_data = []
+                        
                         plaid_transaction, created = PlaidTransaction.objects.update_or_create(
                             transaction_id=transaction['transaction_id'],
                             defaults={
@@ -410,14 +448,13 @@ def sync_transactions_endpoint(request):
                                 'merchant_name': transaction.get('merchant_name'),
                                 'payment_channel': transaction.get('payment_channel', ''),
                                 'pending': transaction.get('pending', False),
-                                'category': transaction.get('category', []),
+                                'category': category_data,
                                 'category_id': transaction.get('category_id'),
-                                'location': transaction.get('location', {}),
-                                'payment_meta': transaction.get('payment_meta', {})
+                                'location': location_data,
+                                'payment_meta': payment_meta_data
                             }
                         )
                         
-                        # Create corresponding expense if this is a new transaction
                         if created:
                             expense = Expense.objects.create(
                                 user=item.user,
@@ -429,14 +466,12 @@ def sync_transactions_endpoint(request):
                                 source='plaid'
                             )
                             
-                            # Link expense to transaction
                             plaid_transaction.expense = expense
                             plaid_transaction.save()
                         
                     except PlaidAccount.DoesNotExist:
                         continue
             except Exception as e:
-                # Log the error but continue with other items
                 print(f"Error syncing transactions for item {item.id}: {str(e)}")
                 continue
             
@@ -464,19 +499,16 @@ class BudgetViewSet(viewsets.ModelViewSet):
         """
         serializer.save(user=self.request.user)
     
+
     @action(detail=False, methods=['get'])
     def summary(self, request):
         """
         Get budget summary including current spending against budgets
         """
-        from datetime import datetime, timedelta
-        from django.utils import timezone
-        from django.db.models import Sum
         
         user = request.user
         today = timezone.now().date()
         
-        # Get budget limits
         budgets = {
             'daily': None,
             'weekly': None,
@@ -486,17 +518,13 @@ class BudgetViewSet(viewsets.ModelViewSet):
         for budget in self.get_queryset():
             budgets[budget.period] = float(budget.amount)
         
-        # Calculate periods
         start_of_day = timezone.make_aware(datetime.combine(today, datetime.min.time()))
         
-        # Calculate start of week (Monday as the first day of the week)
         start_of_week = today - timedelta(days=today.weekday())
         start_of_week = timezone.make_aware(datetime.combine(start_of_week, datetime.min.time()))
         
-        # Calculate start of month
         start_of_month = timezone.make_aware(datetime.combine(today.replace(day=1), datetime.min.time()))
         
-        # Get spending for each period
         daily_spending = Expense.objects.filter(
             user=user, date=today
         ).aggregate(total=Sum('amount'))['total'] or 0
@@ -509,12 +537,93 @@ class BudgetViewSet(viewsets.ModelViewSet):
             user=user, date__gte=start_of_month.date(), date__lte=today
         ).aggregate(total=Sum('amount'))['total'] or 0
         
-        # Calculate percentages (avoid division by zero)
         daily_percentage = (float(daily_spending) / budgets['daily'] * 100) if budgets['daily'] and budgets['daily'] > 0 else 0
         weekly_percentage = (float(weekly_spending) / budgets['weekly'] * 100) if budgets['weekly'] and budgets['weekly'] > 0 else 0
         monthly_percentage = (float(monthly_spending) / budgets['monthly'] * 100) if budgets['monthly'] and budgets['monthly'] > 0 else 0
         
-        # Prepare category breakdown for the current month
+        if budgets['daily'] and budgets['daily'] > 0:
+            existing_notification = Notification.objects.filter(
+                user=user,
+                type__in=['budget_exceed', 'budget_near'],
+                created_at__gte=start_of_day,
+                related_data__budget_type='daily'
+            ).exists()
+            
+            if not existing_notification and daily_percentage >= 50:
+                create_budget_notification(
+                    user=user,
+                    budget_type='daily',
+                    percentage=daily_percentage,
+                    current_amount=float(daily_spending),
+                    budget_limit=budgets['daily']
+                )
+        
+        if budgets['weekly'] and budgets['weekly'] > 0:
+            highest_threshold = None
+            if weekly_percentage >= 100:
+                highest_threshold = 100
+            elif weekly_percentage >= 90:
+                highest_threshold = 90
+            elif weekly_percentage >= 75:
+                highest_threshold = 75
+            elif weekly_percentage >= 50:
+                highest_threshold = 50
+            
+            if highest_threshold:
+                existing_notification = Notification.objects.filter(
+                    user=user,
+                    type__in=['budget_exceed', 'budget_near'],
+                    created_at__gte=start_of_week,
+                    related_data__budget_type='weekly',
+                    related_data__threshold=highest_threshold
+                ).exists()
+                
+                if not existing_notification:
+                    notification = create_budget_notification(
+                        user=user,
+                        budget_type='weekly',
+                        percentage=weekly_percentage,
+                        current_amount=float(weekly_spending),
+                        budget_limit=budgets['weekly']
+                    )
+                    
+                    if notification:
+                        notification.related_data['threshold'] = highest_threshold
+                        notification.save()
+        
+        if budgets['monthly'] and budgets['monthly'] > 0:
+            highest_threshold = None
+            if monthly_percentage >= 100:
+                highest_threshold = 100
+            elif monthly_percentage >= 90:
+                highest_threshold = 90
+            elif monthly_percentage >= 75:
+                highest_threshold = 75
+            elif monthly_percentage >= 50:
+                highest_threshold = 50
+            
+            if highest_threshold:
+                existing_notification = Notification.objects.filter(
+                    user=user,
+                    type__in=['budget_exceed', 'budget_near'],
+                    created_at__gte=start_of_month,
+                    related_data__budget_type='monthly',
+                    related_data__threshold=highest_threshold
+                ).exists()
+                
+                if not existing_notification:
+                    notification = create_budget_notification(
+                        user=user,
+                        budget_type='monthly',
+                        percentage=monthly_percentage,
+                        current_amount=float(monthly_spending),
+                        budget_limit=budgets['monthly']
+                    )
+                    
+                    if notification:
+                        notification.related_data['threshold'] = highest_threshold
+                        notification.save()
+        
         category_breakdown = []
         
         category_totals = Expense.objects.filter(
@@ -603,3 +712,100 @@ class BudgetViewSet(viewsets.ModelViewSet):
                 'monthly': float(data.get('monthly'))
             }
         })
+
+
+
+
+
+
+
+
+class NotificationViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet for viewing and managing user notifications
+    """
+    serializer_class = NotificationSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    
+    def get_queryset(self):
+        """
+        Return notifications for the currently authenticated user
+        """
+        return Notification.objects.filter(user=self.request.user)
+    
+    @action(detail=True, methods=['post'])
+    def mark_as_read(self, request, pk=None):
+        """
+        Mark a notification as read
+        """
+        notification = self.get_object()
+        notification.is_read = True
+        notification.save()
+        return Response({'status': 'success'})
+    
+    @action(detail=False, methods=['post'])
+    def mark_all_as_read(self, request):
+        """
+        Mark all notifications as read
+        """
+        self.get_queryset().update(is_read=True)
+        return Response({'status': 'success'})
+    
+    @action(detail=False, methods=['get'])
+    def unread_count(self, request):
+        """
+        Get count of unread notifications
+        """
+        count = self.get_queryset().filter(is_read=False).count()
+        return Response({'count': count})
+
+def create_budget_notification(user, budget_type, percentage, current_amount, budget_limit):
+    """
+    Create a notification for budget limits
+    
+    Args:
+        user: User object
+        budget_type: 'daily', 'weekly', or 'monthly'
+        percentage: Current percentage of budget used
+        current_amount: Current amount spent
+        budget_limit: Budget limit amount
+    """
+    formatted_amount = f"${current_amount:.2f}"
+    formatted_limit = f"${budget_limit:.2f}"
+    
+    if percentage >= 100:
+        notification_type = 'budget_exceed'
+        title = f"Budget Alert: {budget_type.capitalize()} budget exceeded"
+        message = (f"You've exceeded your {budget_type} budget of {formatted_limit}. "
+                   f"Current spending: {formatted_amount} ({percentage:.1f}%).")
+    elif percentage >= 90:
+        notification_type = 'budget_near'
+        title = f"Budget Alert: {budget_type.capitalize()} budget nearly reached"
+        message = (f"You've used {percentage:.1f}% of your {budget_type} budget. "
+                   f"Current spending: {formatted_amount} of {formatted_limit}.")
+    elif percentage >= 75:
+        # Warning (75%+)
+        notification_type = 'budget_near'
+        title = f"Budget Warning: {budget_type.capitalize()} budget at 75%"
+        message = (f"You've used {percentage:.1f}% of your {budget_type} budget. "
+                   f"Current spending: {formatted_amount} of {formatted_limit}.")
+    elif percentage >= 50:
+        notification_type = 'budget_near'
+        title = f"Budget Update: Halfway through {budget_type} budget"
+        message = (f"You've used {percentage:.1f}% of your {budget_type} budget. "
+                   f"Current spending: {formatted_amount} of {formatted_limit}.")
+    else:
+        return None
+    
+    return Notification.objects.create(
+        user=user,
+        type=notification_type,
+        title=title,
+        message=message,
+        related_data={
+            'budget_type': budget_type,
+            'percentage': percentage,
+            'current_amount': current_amount,
+            'budget_limit': budget_limit
+        }
+    )

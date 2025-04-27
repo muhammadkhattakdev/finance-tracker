@@ -1,0 +1,375 @@
+/* Notifications Page Styles */
+.notifications-page {
+    width: 100%;
+    padding: 20px 0;
+  }
+  
+  .notifications-header {
+    margin-bottom: 30px;
+  }
+  
+  .notifications-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 10px;
+  }
+  
+  .notifications-title h2 {
+    font-size: 1.6rem;
+    font-weight: 600;
+    color: var(--primary);
+    margin: 0;
+  }
+  
+  .notification-icon-path {
+    stroke: var(--primary);
+  }
+  
+  .notifications-subtitle {
+    font-size: 1rem;
+    color: var(--text-muted);
+    margin: 0;
+  }
+  
+  .notifications-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 15px;
+  }
+  
+  .notifications-tabs {
+    display: flex;
+    background: rgba(5, 7, 74, 0.05);
+    border-radius: 10px;
+    padding: 4px;
+  }
+  
+  .tab-button {
+    background: none;
+    border: none;
+    padding: 8px 16px;
+    font-size: 0.95rem;
+    cursor: pointer;
+    border-radius: 8px;
+    color: var(--text-dark);
+    font-weight: 500;
+    position: relative;
+    transition: all 0.2s ease;
+  }
+  
+  .tab-button.active {
+    background-color: white;
+    color: var(--primary);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  }
+  
+  .unread-badge {
+    background-color: var(--accent);
+    color: white;
+    border-radius: 20px;
+    padding: 2px 6px;
+    font-size: 0.75rem;
+    margin-left: 6px;
+    font-weight: 600;
+  }
+  
+  .mark-all-read-button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background-color: rgba(64, 180, 224, 0.1);
+    color: var(--accent);
+    border: none;
+    border-radius: 10px;
+    padding: 10px 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  .mark-all-read-button:hover {
+    background-color: rgba(64, 180, 224, 0.2);
+  }
+  
+  .notifications-error {
+    background-color: rgba(244, 67, 54, 0.1);
+    color: #F44336;
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  .notifications-content {
+    background-color: #fff;
+    border-radius: 15px;
+    box-shadow: 0 5px 15px var(--shadow-color);
+    overflow: hidden;
+    min-height: 400px;
+  }
+  
+  /* Notification Item Styles */
+  .notification-item {
+    display: flex;
+    gap: 15px;
+    padding: 20px;
+    border-bottom: 1px solid var(--border-color);
+    transition: background-color 0.2s;
+    position: relative;
+  }
+  
+  .notification-item:last-child {
+    border-bottom: none;
+  }
+  
+  .notification-item:hover {
+    background-color: rgba(5, 7, 74, 0.02);
+  }
+  
+  .notification-item.unread {
+    background-color: rgba(64, 180, 224, 0.05);
+  }
+  
+  .notification-item.unread:hover {
+    background-color: rgba(64, 180, 224, 0.1);
+  }
+  
+  .notification-icon {
+    flex-shrink: 0;
+    margin-top: 3px;
+  }
+  
+  .notification-content {
+    flex: 1;
+    min-width: 0;
+  }
+  
+  .notification-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 5px;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  
+  .notification-title {
+    font-size: 1.05rem;
+    margin: 0;
+    color: var(--primary);
+    font-weight: 600;
+  }
+  
+  .notification-time {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    white-space: nowrap;
+  }
+  
+  .notification-message {
+    font-size: 0.95rem;
+    margin: 0;
+    color: var(--text-dark);
+    line-height: 1.5;
+  }
+  
+  .mark-read-button {
+    position: absolute;
+    right: 20px;
+    top: 20px;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background-color: var(--accent);
+    color: white;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    opacity: 0;
+  }
+  
+  .notification-item:hover .mark-read-button {
+    opacity: 1;
+  }
+  
+  .mark-read-button:hover {
+    transform: scale(1.1);
+  }
+  
+  /* No Notifications State */
+  .no-notifications {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 20px;
+    text-align: center;
+  }
+  
+  .no-notifications-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background-color: rgba(5, 7, 74, 0.05);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+  }
+  
+  .no-notifications-icon svg {
+    width: 32px;
+    height: 32px;
+  }
+  
+  .no-notifications-icon .notification-icon-path {
+    stroke: var(--text-muted);
+  }
+  
+  .no-notifications h3 {
+    font-size: 1.2rem;
+    color: var(--primary);
+    margin: 0 0 10px 0;
+  }
+  
+  .no-notifications p {
+    color: var(--text-muted);
+    max-width: 300px;
+    margin: 0;
+  }
+  
+  /* Loading State */
+  .notifications-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 20px;
+  }
+  
+  .spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid rgba(5, 7, 74, 0.1);
+    border-left-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 20px;
+  }
+  
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  
+  .notifications-loading p {
+    color: var(--text-muted);
+  }
+  
+  /* Responsive Styles */
+  @media (max-width: 768px) {
+    .notifications-page {
+      padding: 15px;
+    }
+    
+    .notifications-actions {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 15px;
+    }
+    
+    .notifications-tabs {
+      width: 100%;
+    }
+    
+    .tab-button {
+      flex: 1;
+      text-align: center;
+    }
+    
+    .mark-all-read-button {
+      width: 100%;
+      justify-content: center;
+    }
+    
+    .notification-item {
+      padding: 15px;
+    }
+    
+    .mark-read-button {
+      position: relative;
+      right: auto;
+      top: auto;
+      opacity: 1;
+      margin-left: auto;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .notification-header {
+      flex-direction: column;
+      gap: 5px;
+    }
+    
+    .notification-time {
+      font-size: 0.8rem;
+    }
+  }
+  
+  /* Dark Mode Support */
+  @media (prefers-color-scheme: dark) {
+    .notifications-content {
+      background-color: #1e1e1e;
+    }
+    
+    .tab-button {
+      color: var(--text-light);
+    }
+    
+    .tab-button.active {
+      background-color: #2d2d2d;
+    }
+    
+    .notifications-tabs {
+      background: rgba(255, 255, 255, 0.1);
+    }
+    
+    .notification-item {
+      border-bottom-color: rgba(255, 255, 255, 0.1);
+    }
+    
+    .notification-item:hover {
+      background-color: rgba(255, 255, 255, 0.05);
+    }
+    
+    .notification-item.unread {
+      background-color: rgba(64, 180, 224, 0.1);
+    }
+    
+    .notification-item.unread:hover {
+      background-color: rgba(64, 180, 224, 0.15);
+    }
+    
+    .notification-message {
+      color: var(--text-light);
+    }
+    
+    .no-notifications-icon {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+    
+    .spinner {
+      border-color: rgba(255, 255, 255, 0.1);
+      border-left-color: var(--accent);
+    }
+  }

@@ -8,7 +8,6 @@
 body {
     font-family: 'Roboto', serif;
 }
-/* General CSS start */
 .d-flex {
     display: flex !important;
 }
@@ -1045,9 +1044,6 @@ input {
 @media (max-width: 969px) {
     .px-primary {
         padding: 0 28px;
-    }
-    .company-info-section .company-info-box {
-        /* flex-direction: row; */
     }
     .banner-section .banner-box .card-side {
         display: none !important;

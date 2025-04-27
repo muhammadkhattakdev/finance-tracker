@@ -2,8 +2,9 @@ from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-from .models import generate_unique_username, Category, Expense
-from .models import PlaidItem, PlaidAccount, PlaidTransaction
+from .models import *
+
+
 
 
 User = get_user_model()
@@ -136,8 +137,6 @@ class PlaidTransactionSerializer(serializers.ModelSerializer):
         read_only_fields = ['id', 'transaction_id']
 
 
-from rest_framework import serializers
-from .models import Budget
 
 class BudgetSerializer(serializers.ModelSerializer):
     period_display = serializers.CharField(source='get_period_display', read_only=True)
@@ -152,3 +151,40 @@ class BudgetSerializer(serializers.ModelSerializer):
         if attrs.get('amount', 0) <= 0:
             raise serializers.ValidationError({'amount': 'Budget amount must be greater than zero.'})
         return attrs
+    
+
+
+# Add to serializers.py
+
+class NotificationSerializer(serializers.ModelSerializer):
+    time_ago = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = Notification
+        fields = ['id', 'type', 'title', 'message', 'is_read', 'related_data', 
+                  'created_at', 'time_ago']
+        read_only_fields = ['id', 'created_at', 'time_ago']
+    
+    def get_time_ago(self, obj):
+        """Return a human-readable time difference from now"""
+        from django.utils import timezone
+        from datetime import timedelta
+        
+        now = timezone.now()
+        diff = now - obj.created_at
+        
+        if diff < timedelta(minutes=1):
+            return 'just now'
+        elif diff < timedelta(hours=1):
+            minutes = int(diff.total_seconds() / 60)
+            return f'{minutes} minute{"s" if minutes != 1 else ""} ago'
+        elif diff < timedelta(days=1):
+            hours = int(diff.total_seconds() / 3600)
+            return f'{hours} hour{"s" if hours != 1 else ""} ago'
+        elif diff < timedelta(days=30):
+            days = diff.days
+            return f'{days} day{"s" if days != 1 else ""} ago'
+        else:
+            return obj.created_at.strftime('%b %d, %Y')
+
+

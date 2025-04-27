@@ -10,6 +10,7 @@ import DashboardHomepage from "./pages/dashboardPages/dashboardHomepage/dashboar
 import ExpensesPage from "./pages/dashboardPages/expensesPage/expensesPage";
 import BankConnectionPage from "./pages/dashboardPages/connectBankPage/connectBankPage";
 import AnalyticsPage from "./pages/dashboardPages/analyticsPage/analyticsPage";
+import NotificationsPage from "./pages/dashboardPages/notificationsPage/notificationsPage";
 
 export default function Router() {
     return (
@@ -27,6 +28,7 @@ export default function Router() {
                         <Route path="expenses" element={<ExpensesPage />} />
                         <Route path="banks" element={<BankConnectionPage />} />
                         <Route path="analytics" element={<AnalyticsPage />} />
+                        <Route path="notifications" element={<NotificationsPage />} />
                     </Route>
                 </Route>
                 
