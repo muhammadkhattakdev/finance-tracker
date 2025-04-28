@@ -1,163 +1,174 @@
-/* Budget Analytics Page Styles */
 .budget-analytics-page {
-    width: 100%;
-    padding: 20px 0;
+  width: 100%;
+  padding: 20px 0;
+}
+
+.budget-analytics-header {
+  margin-bottom: 30px;
+}
+
+.budget-analytics-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.budget-analytics-title h2 {
+  font-size: 1.6rem;
+  font-weight: 600;
+  color: var(--primary);
+  margin: 0;
+}
+
+.analytics-icon-path {
+  stroke: var(--primary);
+}
+
+.budget-analytics-subtitle {
+  font-size: 1rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.budget-analytics-content {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+.budget-analytics-error {
+  background-color: rgba(244, 67, 54, 0.1);
+  color: #f44336;
+  padding: 15px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.budget-analytics-loader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 100px 0;
+  color: var(--text-muted);
+}
+
+.loader-spinner {
+  width: 50px;
+  height: 50px;
+  border: 5px solid rgba(5, 7, 74, 0.1);
+  border-left-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 20px;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
   }
-  
-  .budget-analytics-header {
-    margin-bottom: 30px;
-  }
-  
-  .budget-analytics-title {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 10px;
-  }
-  
-  .budget-analytics-title h2 {
-    font-size: 1.6rem;
-    font-weight: 600;
-    color: var(--primary);
-    margin: 0;
-  }
-  
-  .analytics-icon-path {
-    stroke: var(--primary);
-  }
-  
-  .budget-analytics-subtitle {
-    font-size: 1rem;
-    color: var(--text-muted);
-    margin: 0;
-  }
-  
-  .budget-analytics-content {
-    display: flex;
-    flex-direction: column;
-    gap: 30px;
-  }
-  
-  .budget-analytics-error {
-    background-color: rgba(244, 67, 54, 0.1);
-    color: #F44336;
-    padding: 15px;
-    border-radius: 10px;
-    margin-bottom: 20px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-  
-  .budget-analytics-loader {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 100px 0;
-    color: var(--text-muted);
-  }
-  
-  .loader-spinner {
-    width: 50px;
-    height: 50px;
-    border: 5px solid rgba(5, 7, 74, 0.1);
-    border-left-color: var(--accent);
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-    margin-bottom: 20px;
-  }
-  
-  @keyframes spin {
-    to {
-      transform: rotate(360deg);
-    }
-  }
-  
+}
+
+.charts-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 30px;
+}
+
+.chart-item {
+  flex: 1;
+  min-width: 300px;
+}
+
+/* No budget prompt styles */
+.no-budget-prompt {
+  background: linear-gradient(
+    135deg,
+    rgba(5, 7, 74, 0.05) 0%,
+    rgba(64, 180, 224, 0.05) 100%
+  );
+  border-radius: 15px;
+  padding: 25px;
+  text-align: center;
+  margin-bottom: 30px;
+  border: 1px dashed var(--border-color);
+}
+
+.no-budget-prompt h3 {
+  color: var(--primary);
+  margin: 0 0 10px 0;
+  font-size: 1.2rem;
+}
+
+.no-budget-prompt p {
+  color: var(--text-muted);
+  margin: 0 0 20px 0;
+  font-size: 0.95rem;
+}
+
+.setup-budget-button {
+  background: linear-gradient(
+    135deg,
+    var(--primary) 0%,
+    var(--primary-light) 100%
+  );
+  color: var(--text-light);
+  border: none;
+  border-radius: 10px;
+  padding: 10px 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.setup-budget-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
+}
+
+/* Responsive styles */
+@media (max-width: 992px) {
   .charts-container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 30px;
+    flex-direction: column;
   }
-  
+
   .chart-item {
-    flex: 1;
-    min-width: 300px;
+    width: 100%;
   }
-  
-  /* No budget prompt styles */
+}
+
+@media (max-width: 768px) {
+  .budget-analytics-page {
+    padding: 15px;
+  }
+
+  .budget-analytics-header {
+    margin-bottom: 20px;
+  }
+
+  .budget-analytics-title h2 {
+    font-size: 1.4rem;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
   .no-budget-prompt {
-    background: linear-gradient(135deg, rgba(5, 7, 74, 0.05) 0%, rgba(64, 180, 224, 0.05) 100%);
-    border-radius: 15px;
-    padding: 25px;
-    text-align: center;
-    margin-bottom: 30px;
-    border: 1px dashed var(--border-color);
+    background: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.05) 0%,
+      rgba(64, 180, 224, 0.05) 100%
+    );
+    border-color: rgba(255, 255, 255, 0.1);
   }
-  
-  .no-budget-prompt h3 {
-    color: var(--primary);
-    margin: 0 0 10px 0;
-    font-size: 1.2rem;
+
+  .loader-spinner {
+    border-color: rgba(255, 255, 255, 0.1);
+    border-left-color: var(--accent);
   }
-  
-  .no-budget-prompt p {
-    color: var(--text-muted);
-    margin: 0 0 20px 0;
-    font-size: 0.95rem;
-  }
-  
-  .setup-budget-button {
-    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
-    color: var(--text-light);
-    border: none;
-    border-radius: 10px;
-    padding: 10px 16px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  }
-  
-  .setup-budget-button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
-  }
-  
-  /* Responsive styles */
-  @media (max-width: 992px) {
-    .charts-container {
-      flex-direction: column;
-    }
-    
-    .chart-item {
-      width: 100%;
-    }
-  }
-  
-  @media (max-width: 768px) {
-    .budget-analytics-page {
-      padding: 15px;
-    }
-    
-    .budget-analytics-header {
-      margin-bottom: 20px;
-    }
-    
-    .budget-analytics-title h2 {
-      font-size: 1.4rem;
-    }
-  }
-  
-  /* Dark mode support */
-  @media (prefers-color-scheme: dark) {
-    .no-budget-prompt {
-      background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(64, 180, 224, 0.05) 100%);
-      border-color: rgba(255, 255, 255, 0.1);
-    }
-    
-    .loader-spinner {
-      border-color: rgba(255, 255, 255, 0.1);
-      border-left-color: var(--accent);
-    }
-  }
+}

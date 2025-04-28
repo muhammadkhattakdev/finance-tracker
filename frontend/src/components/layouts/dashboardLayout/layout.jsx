@@ -11,6 +11,7 @@ const additionalStyles = `
 `;
 
 import Sidebar from "../../dashoardComponents/sidebar/sidebar";
+import ToastContainer from "../../dashoardComponents/toastNotification/container";
 
 const MenuIcon = () => (
   <svg
@@ -130,7 +131,9 @@ const DashboardLayout = () => {
         className={`sidebar-overlay ${mobileOpen ? "visible" : ""}`}
         onClick={toggleMobileSidebar}
       ></div>
+      <ToastContainer />
     </div>
+    
   );
 };
 

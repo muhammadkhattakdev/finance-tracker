@@ -5,21 +5,17 @@ const ToastNotification = ({ notification, onClose }) => {
   const [isExiting, setIsExiting] = useState(false);
   
   useEffect(() => {
-    // Automatically close toast after 6 seconds
     const timer = setTimeout(() => {
       setIsExiting(true);
       
-      // Give time for exit animation before removing
       setTimeout(() => {
         onClose();
       }, 300);
     }, 6000);
     
-    // Clear timer on unmount
     return () => clearTimeout(timer);
   }, [onClose]);
   
-  // Get the appropriate icon based on notification type
   const getIcon = () => {
     switch (notification.type) {
       case 'budget_exceed':

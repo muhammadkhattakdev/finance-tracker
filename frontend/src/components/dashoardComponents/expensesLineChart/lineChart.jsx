@@ -11,6 +11,8 @@ const DailyExpenseChart = () => {
   const [totalSpent, setTotalSpent] = useState(0);
   const [averageDaily, setAverageDaily] = useState(0);
 
+
+
   useEffect(() => {
     const fetchMonthlyExpenses = async () => {
       setIsLoading(true);
@@ -18,32 +20,33 @@ const DailyExpenseChart = () => {
         const today = new Date();
         const firstDayOfMonth = startOfMonth(today);
         const lastDayOfMonth = endOfMonth(today);
-        
-        // Format dates for API query
+
         const formattedStartDate = format(firstDayOfMonth, 'yyyy-MM-dd');
         const formattedEndDate = format(lastDayOfMonth, 'yyyy-MM-dd');
-        
-        // Fetch expenses within current month
-        const response = await Request.get(`/expenses/?start_date=${formattedStartDate}&end_date=${formattedEndDate}`);
-        const expenses = response.data;
-        
-        // Process expenses to get daily totals for current month
+
+        const queryParams = new URLSearchParams({
+            date_after: formattedStartDate,
+            date_before: formattedEndDate,
+            page_size: 10000
+          }).toString();
+
+        const response = await Request.get(`/expenses/?${queryParams}`);
+        const expenses = response.data.results ? response.data.results : response.data;
+
         const monthlyData = processMonthlyExpenses(expenses, firstDayOfMonth, today);
-        
-        // Calculate statistics
+
         const total = monthlyData.reduce((sum, day) => sum + day.amount, 0);
         const daysElapsed = monthlyData.length;
-        
+
         setTotalSpent(total);
         setAverageDaily(daysElapsed > 0 ? total / daysElapsed : 0);
-        
-        // Set chart data
+
         setChartData(monthlyData);
         setError(null);
       } catch (err) {
         console.error('Error fetching monthly expenses:', err);
         setError('Failed to load expense trend data');
-        // Fallback to empty data
+
         setChartData([]);
       } finally {
         setIsLoading(false);
@@ -53,18 +56,14 @@ const DailyExpenseChart = () => {
     fetchMonthlyExpenses();
   }, []);
 
-  // Process expenses to get daily totals for the current month
   const processMonthlyExpenses = (expenses, startDate, endDate) => {
-    // Create a map to store daily totals
     const dailyMap = new Map();
-    
-    // Get all days in the current month up to today
+
     const days = eachDayOfInterval({
       start: startDate,
       end: endDate
     });
-    
-    // Initialize all days with zero amounts
+
     days.forEach(day => {
       const dateKey = format(day, 'yyyy-MM-dd');
       dailyMap.set(dateKey, { 
@@ -73,18 +72,16 @@ const DailyExpenseChart = () => {
         amount: 0 
       });
     });
-    
-    // Add up expenses for each day
+
     expenses.forEach(expense => {
-      const dateKey = expense.date; // Assuming the date format is yyyy-MM-dd
+      const dateKey = expense.date;
       if (dailyMap.has(dateKey)) {
         const day = dailyMap.get(dateKey);
         day.amount += parseFloat(expense.amount);
         dailyMap.set(dateKey, day);
       }
     });
-    
-    // Convert map to array and sort by date
+
     return Array.from(dailyMap.values())
       .sort((a, b) => new Date(a.date) - new Date(b.date));
   };
@@ -101,11 +98,9 @@ const DailyExpenseChart = () => {
     return null;
   };
 
-  // Format display values
   const formattedTotal = totalSpent.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
   const formattedAverage = averageDaily.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
   
-  // Get current month name for display
   const currentMonth = format(new Date(), 'MMMM yyyy');
 
   return (

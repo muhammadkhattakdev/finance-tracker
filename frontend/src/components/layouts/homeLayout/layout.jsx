@@ -1,8 +1,8 @@
 import React from "react";
 import { Outlet } from "react-router-dom";
 import './style.css';
-import Header from "../../homepageComponents/header";
 import Footer from "../../homepageComponents/footer";
+import Navbar from "../../homepageComponents/navbar";
 
 
 export default function HomeLayout() {
@@ -10,7 +10,7 @@ export default function HomeLayout() {
 
     return (
         <>
-            <Header />
+            <Navbar />
             <Outlet />
             <Footer />
         </>

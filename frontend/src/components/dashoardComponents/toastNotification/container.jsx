@@ -1,47 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import ToastNotification from './toastNotification';
 import './style.css';
-import Request from '../../utils/request';
+import { useNotifications } from '../../../context/notificationsContext';
 
 const ToastContainer = () => {
   const [toasts, setToasts] = useState([]);
+  const { newNotifications, clearNewNotifications } = useNotifications();
   
   useEffect(() => {
-    fetchUnreadNotifications();
-  }, []);
-  
-  const fetchUnreadNotifications = async () => {
-    try {
-      const response = await Request.get('/notifications/?unread=true');
-      const unreadNotifications = response.data;
+    if (newNotifications.length > 0) {
+      newNotifications.forEach(notification => {
+        addToast(notification);
+      });
       
-      const shownNotifications = getShownNotifications();
-      const newNotifications = unreadNotifications.filter(
-        notification => !shownNotifications.includes(notification.id.toString())
-      );
-      
-      if (newNotifications.length > 0) {
-        markNotificationsAsShown(newNotifications.map(n => n.id));
-        
-        newNotifications.forEach(notification => {
-          addToast(notification);
-        });
-      }
-    } catch (error) {
-      console.error('Error fetching unread notifications:', error);
+      clearNewNotifications();
     }
-  };
-  
-  const getShownNotifications = () => {
-    const shown = sessionStorage.getItem('shown_notifications');
-    return shown ? JSON.parse(shown) : [];
-  };
-  
-  const markNotificationsAsShown = (notificationIds) => {
-    const shown = getShownNotifications();
-    const updatedShown = [...shown, ...notificationIds.map(id => id.toString())];
-    sessionStorage.setItem('shown_notifications', JSON.stringify(updatedShown));
-  };
+  }, [newNotifications, clearNewNotifications]);
   
   const addToast = (notification) => {
     const toast = {
@@ -68,6 +42,5 @@ const ToastContainer = () => {
     </div>
   );
 };
-
 
 export default ToastContainer;

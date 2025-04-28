@@ -3,6 +3,7 @@ import "./style.css";
 import ExpenseModal from "../../../dashoardComponents/addExpenseModal/addExpenseModal";
 import Request from "../../../utils/request";
 import { format } from "date-fns";
+import ExportModal from "../../../dashoardComponents/exportExpensesModal/exportExpensesModal";
 
 const ExpenseIcon = () => (
   <svg
@@ -143,6 +144,31 @@ const RefreshIcon = () => (
   </svg>
 );
 
+const ExportIcon = () => (
+  <svg
+    width="20"
+    height="20"
+    viewBox="0 0 20 20"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path
+      d="M10.8333 13.3333L15 9.16667M15 9.16667L10.8333 5M15 9.16667H5"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <path
+      d="M5 16.6667H15C15.9205 16.6667 16.6667 15.9205 16.6667 15V3.33333C16.6667 2.41286 15.9205 1.66667 15 1.66667H5C4.07953 1.66667 3.33333 2.41286 3.33333 3.33333V15C3.33333 15.9205 4.07953 16.6667 5 16.6667Z"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
 // Hardcoded categories
 const CATEGORIES = [
   { id: 1, name: "Groceries", icon: "🛒", color: "#4CAF50" },
@@ -162,25 +188,128 @@ const CATEGORIES = [
   { id: 15, name: "Other", icon: "📌", color: "#9E9E9E" },
 ];
 
+const Pagination = ({ totalItems, itemsPerPage, currentPage, onPageChange }) => {
+  const totalPages = Math.ceil(totalItems / itemsPerPage);
+  
+  if (totalPages <= 1) return null;
+  
+  // Generate page numbers with ellipsis for large numbers of pages
+  const getPageNumbers = () => {
+    const pages = [];
+    
+    // Always show first page
+    pages.push(1);
+    
+    // Current page neighborhood
+    for (let i = Math.max(2, currentPage - 1); i <= Math.min(totalPages - 1, currentPage + 1); i++) {
+      if (i === 2 && currentPage > 3) {
+        pages.push("...");
+      } else if (i === totalPages - 1 && currentPage < totalPages - 2) {
+        pages.push("...");
+      } else {
+        pages.push(i);
+      }
+    }
+    
+    // Always show last page if more than 1 page
+    if (totalPages > 1) {
+      pages.push(totalPages);
+    }
+    
+    // Remove duplicates and ellipsis next to each other
+    return Array.from(new Set(pages)).filter((page, index, array) => {
+      if (page === "..." && array[index - 1] === "...") return false;
+      return true;
+    });
+  };
+  
+  return (
+    <div className="pagination">
+      <button 
+        className="pagination-button" 
+        onClick={() => onPageChange(currentPage - 1)}
+        disabled={currentPage === 1}
+      >
+        Previous
+      </button>
+      
+      {getPageNumbers().map((page, index) => (
+        <button
+          key={index}
+          className={`pagination-page ${page === currentPage ? 'active' : ''}`}
+          onClick={() => page !== "..." && onPageChange(page)}
+          disabled={page === "..."}
+        >
+          {page}
+        </button>
+      ))}
+      
+      <button 
+        className="pagination-button" 
+        onClick={() => onPageChange(currentPage + 1)}
+        disabled={currentPage === totalPages}
+      >
+        Next
+      </button>
+    </div>
+  );
+};
+
 const ExpensesPage = () => {
   const [expenses, setExpenses] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [sourceFilter, setSourceFilter] = useState(null);
   const [error, setError] = useState(null);
   const [syncing, setSyncing] = useState(false);
+  
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
+  const itemsPerPage = 30;
 
   useEffect(() => {
     fetchExpenses();
-  }, []);
+  }, [currentPage, searchQuery, selectedCategory, sourceFilter]);
 
   const fetchExpenses = async () => {
     setIsLoading(true);
     try {
-      const response = await Request.get("/expenses/");
-      setExpenses(response.data);
+      // Build query parameters for filtering and pagination
+      let queryParams = new URLSearchParams();
+      
+      // Add pagination parameters
+      queryParams.append('page', currentPage);
+      queryParams.append('page_size', itemsPerPage);
+      
+      // Add search parameter if present
+      if (searchQuery) {
+        queryParams.append('search', searchQuery);
+      }
+      
+      if (selectedCategory) {
+        queryParams.append('category', selectedCategory);
+      }
+      
+      if (sourceFilter) {
+        queryParams.append('source', sourceFilter);
+      }
+      
+      const response = await Request.get(`/expenses/?${queryParams.toString()}`);
+      
+      // If the response includes pagination info
+      if (response.data.results) {
+        setExpenses(response.data.results);
+        setTotalItems(response.data.count);
+      } else {
+        // Fallback for API that doesn't support pagination yet
+        setExpenses(response.data);
+        setTotalItems(response.data.length);
+      }
+      
       setError(null);
     } catch (err) {
       console.error("Error fetching expenses:", err);
@@ -230,24 +359,83 @@ const ExpensesPage = () => {
       setSyncing(false);
     }
   };
+  
+  const handleExport = async (startDate, endDate) => {
+    try {
+      // Build query parameters for the export
+      let queryParams = new URLSearchParams();
+      
+      // Add date range
+      queryParams.append('start_date', startDate);
+      queryParams.append('end_date', endDate);
+      
+      // Add other active filters
+      if (searchQuery) {
+        queryParams.append('search', searchQuery);
+      }
+      
+      if (selectedCategory) {
+        queryParams.append('category', selectedCategory);
+      }
+      
+      if (sourceFilter) {
+        queryParams.append('source', sourceFilter);
+      }
+      
+      // Make a GET request to export endpoint with responseType 'blob'
+      const response = await Request.get(`/expenses/export/?${queryParams.toString()}`, {
+        responseType: 'blob'
+      });
+      
+      // Create a download link and trigger download
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      const fileName = `expenses_${startDate}_to_${endDate}.csv`;
+      link.setAttribute('download', fileName);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      
+      // Close the export modal
+      setIsExportModalOpen(false);
+    } catch (err) {
+      console.error("Error exporting expenses:", err);
+      setError("Failed to export expenses. Please try again.");
+    }
+  };
 
-  const filteredExpenses = expenses.filter((expense) => {
-    const matchesSearch =
-      expense.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      expense.comment?.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = selectedCategory
-      ? expense.category === selectedCategory
-      : true;
-    const matchesSource = sourceFilter
-      ? expense.source === sourceFilter
-      : true;
-    return matchesSearch && matchesCategory && matchesSource;
-  });
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+    // Scroll to top of the table when changing pages
+    window.scrollTo({
+      top: document.querySelector('.expenses-table-container').offsetTop - 80,
+      behavior: 'smooth'
+    });
+  };
+
+  const applyFilters = () => {
+    // Reset to the first page when applying new filters
+    setCurrentPage(1);
+    fetchExpenses();
+  };
 
   const resetFilters = () => {
     setSearchQuery("");
     setSelectedCategory(null);
     setSourceFilter(null);
+    setCurrentPage(1);
+    // After resetting all filters, fetch expenses
+    fetchExpenses();
+  };
+
+  const handleSearchInputChange = (e) => {
+    setSearchQuery(e.target.value);
+  };
+
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+    applyFilters();
   };
 
   const getCategoryById = (categoryId) => {
@@ -263,33 +451,40 @@ const ExpensesPage = () => {
           <h2>Expenses</h2>
         </div>
         <div className="expenses-actions">
-          <div className="search-container">
+          <form onSubmit={handleSearchSubmit} className="search-container">
             <SearchIcon />
             <input
               type="text"
               placeholder="Search expenses..."
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={handleSearchInputChange}
               className="search-input"
             />
             {searchQuery && (
               <button
+                type="button"
                 className="clear-search"
-                onClick={() => setSearchQuery("")}
+                onClick={() => {
+                  setSearchQuery("");
+                  applyFilters();
+                }}
               >
                 ×
               </button>
             )}
-          </div>
+            <button type="submit" style={{ display: 'none' }}></button>
+          </form>
+          
           <div className="category-filter">
             <FilterIcon />
             <select
               value={selectedCategory || ""}
-              onChange={(e) =>
+              onChange={(e) => {
                 setSelectedCategory(
                   e.target.value ? Number(e.target.value) : null
-                )
-              }
+                );
+                applyFilters();
+              }}
               className="category-select"
             >
               <option value="">All Categories</option>
@@ -300,11 +495,15 @@ const ExpensesPage = () => {
               ))}
             </select>
           </div>
+          
           <div className="source-filter">
             <FilterIcon />
             <select
               value={sourceFilter || ""}
-              onChange={(e) => setSourceFilter(e.target.value || null)}
+              onChange={(e) => {
+                setSourceFilter(e.target.value || null);
+                applyFilters();
+              }}
               className="source-select"
             >
               <option value="">All Sources</option>
@@ -312,6 +511,15 @@ const ExpensesPage = () => {
               <option value="plaid">Bank Transactions</option>
             </select>
           </div>
+          
+          <button 
+            className="export-button" 
+            onClick={() => setIsExportModalOpen(true)}
+          >
+            <ExportIcon />
+            <span>Export</span>
+          </button>
+          
           <button 
             className={`sync-button ${syncing ? 'syncing' : ''}`} 
             onClick={handleSyncTransactions}
@@ -329,6 +537,7 @@ const ExpensesPage = () => {
               </>
             )}
           </button>
+          
           <button
             className="add-expense-button"
             onClick={() => setIsModalOpen(true)}
@@ -347,7 +556,7 @@ const ExpensesPage = () => {
             <div className="spinner"></div>
             <p>Loading expenses...</p>
           </div>
-        ) : filteredExpenses.length === 0 ? (
+        ) : expenses.length === 0 ? (
           <div className="no-expenses">
             <p>
               No expenses found.{" "}
@@ -359,84 +568,93 @@ const ExpensesPage = () => {
             </p>
           </div>
         ) : (
-          <table className="expenses-table">
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Category</th>
-                <th>Amount</th>
-                <th>Date</th>
-                <th>Source</th>
-                <th>Comment</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredExpenses.map((expense) => {
-                const category = getCategoryById(expense.category);
-                return (
-                  <tr key={expense.id}>
-                    <td>{expense.title}</td>
-                    <td>
-                      <div
-                        className="category-badge"
-                        style={{
-                          backgroundColor: category.color + "20",
-                          color: category.color,
-                        }}
-                      >
-                        <span className="category-icon">{category.icon}</span>
-                        <span>{category.name}</span>
-                      </div>
-                    </td>
-                    <td className="amount-cell">
-                      ${parseFloat(expense.amount).toFixed(2)}
-                    </td>
-                    <td>{format(new Date(expense.date), "dd MMM yyyy")}</td>
-                    <td>
-                      <div
-                        className="source-badge"
-                        style={{
-                          backgroundColor:
-                            expense.source === "plaid"
-                              ? "#4CAF5020"
-                              : "#9C27B020",
-                          color:
-                            expense.source === "plaid" ? "#4CAF50" : "#9C27B0",
-                        }}
-                      >
-                        {expense.source === "plaid" ? "Bank" : "Manual"}
-                      </div>
-                    </td>
-                    <td className="comment-cell">
-                      {expense.comment ? (
-                        <div className="comment-content">
-                          {expense.comment.length > 50
-                            ? `${expense.comment.substring(0, 50)}...`
-                            : expense.comment}
+          <>
+            <table className="expenses-table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Category</th>
+                  <th>Amount</th>
+                  <th>Date</th>
+                  <th>Source</th>
+                  <th>Comment</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {expenses.map((expense) => {
+                  const category = getCategoryById(expense.category);
+                  return (
+                    <tr key={expense.id}>
+                      <td>{expense.title}</td>
+                      <td>
+                        <div
+                          className="category-badge"
+                          style={{
+                            backgroundColor: category.color + "20",
+                            color: category.color,
+                          }}
+                        >
+                          <span className="category-icon">{category.icon}</span>
+                          <span>{category.name}</span>
                         </div>
-                      ) : (
-                        <span className="no-comment">-</span>
-                      )}
-                    </td>
-                    <td>
-                      <div className="expense-actions">
-                        {expense.source !== "plaid" && (
-                          <button
-                            className="delete-button"
-                            onClick={() => handleDeleteExpense(expense.id)}
-                            aria-label="Delete expense"
-                          >
-                            Delete
-                          </button>
+                      </td>
+                      <td className="amount-cell">
+                        ${parseFloat(expense.amount).toFixed(2)}
+                      </td>
+                      <td>{format(new Date(expense.date), "dd MMM yyyy")}</td>
+                      <td>
+                        <div
+                          className="source-badge"
+                          style={{
+                            backgroundColor:
+                              expense.source === "plaid"
+                                ? "#4CAF5020"
+                                : "#9C27B020",
+                            color:
+                              expense.source === "plaid" ? "#4CAF50" : "#9C27B0",
+                          }}
+                        >
+                          {expense.source === "plaid" ? "Bank" : "Manual"}
+                        </div>
+                      </td>
+                      <td className="comment-cell">
+                        {expense.comment ? (
+                          <div className="comment-content">
+                            {expense.comment.length > 50
+                              ? `${expense.comment.substring(0, 50)}...`
+                              : expense.comment}
+                          </div>
+                        ) : (
+                          <span className="no-comment">-</span>
                         )}
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+                      </td>
+                      <td>
+                        <div className="expense-actions">
+                          {expense.source !== "plaid" && (
+                            <button
+                              className="delete-button"
+                              onClick={() => handleDeleteExpense(expense.id)}
+                              aria-label="Delete expense"
+                            >
+                              Delete
+                            </button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+            
+            <Pagination
+              totalItems={totalItems}
+              itemsPerPage={itemsPerPage}
+              currentPage={currentPage}
+              onPageChange={handlePageChange}
+            />
+          </>
         )}
       </div>
 
@@ -445,6 +663,13 @@ const ExpensesPage = () => {
           onClose={() => setIsModalOpen(false)}
           onSave={handleAddExpense}
           categories={CATEGORIES}
+        />
+      )}
+      
+      {isExportModalOpen && (
+        <ExportModal
+          onClose={() => setIsExportModalOpen(false)}
+          onExport={handleExport}
         />
       )}
     </div>

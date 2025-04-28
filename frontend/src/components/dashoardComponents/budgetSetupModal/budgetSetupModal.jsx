@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import "./style.css";
+import { useNotifications } from "../../../context/notificationsContext";
 
 const BudgetSetupModal = ({ onClose, onSave, currentBudgets = {} }) => {
   const [budgets, setBudgets] = useState({
@@ -11,6 +12,9 @@ const BudgetSetupModal = ({ onClose, onSave, currentBudgets = {} }) => {
   const [isLoading, setIsLoading] = useState(false);
   const modalRef = useRef(null);
   const firstInputRef = useRef(null);
+  
+  // Add notifications context
+  const { checkForNewNotifications } = useNotifications();
 
   useEffect(() => {
     // Focus first input when modal opens
@@ -110,6 +114,12 @@ const BudgetSetupModal = ({ onClose, onSave, currentBudgets = {} }) => {
         };
 
         await onSave(formattedBudgets);
+        
+        // Check for new notifications after budget update
+        setTimeout(() => {
+          checkForNewNotifications();
+        }, 500); // Small delay to allow backend to process
+        
         onClose();
       } catch (error) {
         console.error("Error saving budgets:", error);

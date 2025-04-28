@@ -1,5 +1,7 @@
 from rest_framework import status, generics, permissions, viewsets, filters
+import csv
 from rest_framework.response import Response
+from django.http import HttpResponse
 from rest_framework_simplejwt.views import TokenObtainPairView
 from django_filters.rest_framework import DjangoFilterBackend
 from .serializers import *
@@ -10,6 +12,7 @@ from rest_framework.decorators import action
 from datetime import datetime, timedelta
 from django.utils import timezone
 from django.db.models import Sum
+from rest_framework.pagination import PageNumberPagination
 import plaid
 from plaid.api import plaid_api
 from plaid.model.link_token_create_request import LinkTokenCreateRequest
@@ -23,6 +26,10 @@ from rest_framework.views import APIView
 from rest_framework.decorators import api_view, permission_classes
 
 
+class StandardResultsSetPagination(PageNumberPagination):
+    page_size = 30
+    page_size_query_param = 'page_size'
+    max_page_size = 100
 
 
 class CustomTokenObtainPairView(TokenObtainPairView):
@@ -82,15 +89,15 @@ class ExpenseViewSet(viewsets.ModelViewSet):
     serializer_class = ExpenseSerializer
     permission_classes = [permissions.IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
-    filterset_fields = ['category', 'date']
+    filterset_fields = ['category', 'date', 'source']  
     search_fields = ['title', 'comment']
     ordering_fields = ['date', 'amount', 'title', 'created_at']
+    pagination_class = StandardResultsSetPagination  
     
     def get_queryset(self):
         """
         This view returns a list of all expenses for the currently authenticated user.
         """
-
         return Expense.objects.filter(user=self.request.user)
 
 
@@ -134,7 +141,76 @@ class ExpenseViewSet(viewsets.ModelViewSet):
         except Exception as e:
             print(f"Error checking budget limits: {str(e)}")
 
-
+    @action(detail=False, methods=['get'])
+    def export(self, request):
+        """
+        Export expenses as CSV based on filters
+        """
+        # Get query parameters
+        start_date = request.query_params.get('start_date')
+        end_date = request.query_params.get('end_date')
+        category = request.query_params.get('category')
+        source = request.query_params.get('source')
+        search = request.query_params.get('search')
+        
+        if not start_date or not end_date:
+            return Response(
+                {"error": "Start date and end date are required"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Get filtered queryset
+        queryset = self.get_queryset().filter(date__gte=start_date, date__lte=end_date)
+        
+        # Apply additional filters if provided
+        if category:
+            queryset = queryset.filter(category=category)
+        
+        if source:
+            queryset = queryset.filter(source=source)
+        
+        if search:
+            queryset = queryset.filter(
+                models.Q(title__icontains=search) | 
+                models.Q(comment__icontains=search)
+            )
+        
+        # Order by date
+        queryset = queryset.order_by('date')
+        
+        # Create the HttpResponse with CSV content
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = f'attachment; filename="expenses_{start_date}_to_{end_date}.csv"'
+        
+        # Create CSV writer
+        writer = csv.writer(response)
+        
+        # Write header row
+        writer.writerow([
+            'ID', 'Title', 'Amount', 'Date', 'Category', 
+            'Source', 'Comment', 'Created At'
+        ])
+        
+        # Get category name dictionary for faster lookups
+        categories = {
+            cat.id: cat.name for cat in Category.objects.all()
+        }
+        
+        # Write data rows
+        for expense in queryset:
+            category_name = categories.get(expense.category_id, 'Uncategorized') if expense.category_id else 'Uncategorized'
+            writer.writerow([
+                expense.id,
+                expense.title,
+                expense.amount,
+                expense.date,
+                category_name,
+                expense.source,
+                expense.comment,
+                expense.created_at.strftime('%Y-%m-%d %H:%M:%S')
+            ])
+        
+        return response
 
 
 

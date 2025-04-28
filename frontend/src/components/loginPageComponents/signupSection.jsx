@@ -4,6 +4,7 @@ import { Form, Formik } from "formik";
 import * as Yup from "yup";
 import Input from "./input";
 import Request from "../utils/request";
+import './style.css';
 
 const SignupSchema = Yup.object().shape({
   email: Yup.string()
@@ -65,143 +66,151 @@ const SignUp = () => {
   };
 
   return (
-    <section className="login-section d-flex align-items-center">
-      <div className="login-containerr">
-        <div className="login-box px-primary d-flex">
-          <div className="login-header d-flex align-items-center">
-            <h2 className="sign-in-text">
-              Sign up to <span className="blue-text">finance tracker</span>
-            </h2>
-            <p className="login-info-text">
-              Create an account to start managing your finances efficiently.
-            </p>
-          </div>
-          <Formik
-            initialValues={{
-              email: "",
-              firstName: "",
-              lastName: "",
-              password: "",
-              confirmPassword: "",
-            }}
-            validationSchema={SignupSchema}
-            onSubmit={handleSignup}
-          >
-            {({ isSubmitting, errors, touched }) => (
-              <Form className="login-form d-flex">
-                <div className="login-input-box d-flex">
-                  <label htmlFor="email" className="login-input-box-label">
-                    Email
-                  </label>
+    <div className="auth-container">
+      <div className="auth-card">
+        <div className="auth-header">
+          <h1 className="auth-title">
+            Join <span className="brand-highlight">finance tracker</span>
+          </h1>
+          <p className="auth-subtitle">
+            Create an account to start managing your finances efficiently.
+          </p>
+        </div>
+        
+        <Formik
+          initialValues={{
+            email: "",
+            firstName: "",
+            lastName: "",
+            password: "",
+            confirmPassword: "",
+          }}
+          validationSchema={SignupSchema}
+          onSubmit={handleSignup}
+        >
+          {({ isSubmitting, errors, touched }) => (
+            <Form className="auth-form">
+              <div className="form-group">
+                <label htmlFor="email" className="form-label">
+                  Email
+                </label>
+                <Input
+                  name="email"
+                  type="email"
+                  className="form-input"
+                  placeholder="Your email address"
+                  aria-label="Email"
+                />
+                {errors.email && touched.email && (
+                  <div className="error-message">{errors.email}</div>
+                )}
+              </div>
+              
+              <div className="form-group">
+                <label htmlFor="firstName" className="form-label">
+                  First Name
+                </label>
+                <Input
+                  name="firstName"
+                  type="text"
+                  className="form-input"
+                  placeholder="Your first name"
+                  aria-label="First Name"
+                />
+                {errors.firstName && touched.firstName && (
+                  <div className="error-message">{errors.firstName}</div>
+                )}
+              </div>
+              
+              <div className="form-group">
+                <label htmlFor="lastName" className="form-label">
+                  Last Name
+                </label>
+                <Input
+                  name="lastName"
+                  type="text"
+                  className="form-input"
+                  placeholder="Your last name"
+                  aria-label="Last Name"
+                />
+                {errors.lastName && touched.lastName && (
+                  <div className="error-message">{errors.lastName}</div>
+                )}
+              </div>
+              
+              <div className="form-group">
+                <label htmlFor="password" className="form-label">
+                  Password
+                </label>
+                <div className="password-field">
                   <Input
-                    style={{ width: "100%" }}
-                    name="email"
-                    type="email"
-                    className="login-input"
-                    placeholder="Your email address"
-                    required
-                  />
-                  {errors.email && touched.email && (
-                    <div className="error-message">{errors.email}</div>
-                  )}
-                </div>
-                <div className="login-input-box d-flex">
-                  <label htmlFor="firstName" className="login-input-box-label">
-                    First Name
-                  </label>
-                  <Input
-                    style={{ width: "100%" }}
-                    name="firstName"
-                    type="text"
-                    className="login-input"
-                    placeholder="Your first name"
-                    required
-                  />
-                  {errors.firstName && touched.firstName && (
-                    <div className="error-message">{errors.firstName}</div>
-                  )}
-                </div>
-                <div className="login-input-box d-flex">
-                  <label htmlFor="lastName" className="login-input-box-label">
-                    Last Name
-                  </label>
-                  <Input
-                    style={{ width: "100%" }}
-                    name="lastName"
-                    type="text"
-                    className="login-input"
-                    placeholder="Your last name"
-                    required
-                  />
-                  {errors.lastName && touched.lastName && (
-                    <div className="error-message">{errors.lastName}</div>
-                  )}
-                </div>
-                <div className="login-input-box d-flex">
-                  <label htmlFor="password" className="login-input-box-label">
-                    Password
-                  </label>
-                  <Input
-                    style={{ width: "100%" }}
                     name="password"
                     type="password"
-                    className="login-input"
-                    placeholder="Your password"
-                    required
+                    className="form-input"
+                    placeholder="Create a password"
+                    aria-label="Password"
                   />
-                  {errors.password && touched.password ? (
-                    <div className="error-message">{errors.password}</div>
-                  ) : (
-                    <div className="password-requirements" style={{ fontSize: "0.8rem", color: "#555", marginTop: "4px" }}>
-                      Password must contain at least 8 characters, including one uppercase letter, 
-                      one lowercase letter, one number, and one special character (@$!%*?&#).
-                    </div>
-                  )}
                 </div>
-                <div className="login-input-box d-flex">
-                  <label htmlFor="confirmPassword" className="login-input-box-label">
-                    Confirm Password
-                  </label>
-                  <Input
-                    style={{ width: "100%" }}
-                    name="confirmPassword"
-                    className="login-input"
-                    placeholder="Confirm your password"
-                    type="password"
-                    required
-                  />
-                  {errors.confirmPassword && touched.confirmPassword && (
-                    <div className="error-message">{errors.confirmPassword}</div>
-                  )}
-                </div>
-                
-                {errorMessage && (
-                  <div className="error-alert" style={{ color: "red" }}>
-                    {errorMessage}
+                {errors.password && touched.password ? (
+                  <div className="error-message">{errors.password}</div>
+                ) : (
+                  <div className="password-requirements">
+                    Password must contain at least 8 characters, including one uppercase letter, 
+                    one lowercase letter, one number, and one special character.
                   </div>
                 )}
-
-                <div className="login-input-btns d-flex">
-                  <button 
-                    type="submit" 
-                    className="btn-login" 
-                    disabled={isSubmitting || isLoading}
-                  >
-                    {isLoading ? "Signing Up..." : "Sign Up"}
-                  </button>
-                  <p className="question-text">
-                    Already have an account?{" "}
-                    <Link to="/login" className="account-creation-btn">
-                      Log In
-                    </Link>
-                  </p>
+              </div>
+              
+              <div className="form-group">
+                <label htmlFor="confirmPassword" className="form-label">
+                  Confirm Password
+                </label>
+                <div className="password-field">
+                  <Input
+                    name="confirmPassword"
+                    className="form-input"
+                    placeholder="Confirm your password"
+                    type="password"
+                    aria-label="Confirm Password"
+                  />
                 </div>
-              </Form>
-            )}
-          </Formik>
+                {errors.confirmPassword && touched.confirmPassword && (
+                  <div className="error-message">{errors.confirmPassword}</div>
+                )}
+              </div>
+              
+              {errorMessage && (
+                <div className="error-alert">
+                  {errorMessage}
+                </div>
+              )}
+
+              <button
+                type="submit" 
+                className="btn-auth"
+                disabled={isSubmitting || isLoading}
+              >
+                {isLoading ? (
+                  <>
+                    <span className="loading"></span>
+                    Creating Account...
+                  </>
+                ) : (
+                  "Create Account"
+                )}
+              </button>
+            </Form>
+          )}
+        </Formik>
+
+        <div className="auth-alternate">
+          Already have an account?{" "}
+          <Link to="/login" className="auth-alternate-link">
+            Sign in
+          </Link>
         </div>
       </div>
-    </section>
+    </div>
   );
 };
 

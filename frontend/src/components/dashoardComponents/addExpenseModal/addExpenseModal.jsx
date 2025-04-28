@@ -1,17 +1,21 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './style.css';
+import { useNotifications } from '../../../context/notificationsContext';
 
 const ExpenseModal = ({ onClose, onSave, categories }) => {
   const [formData, setFormData] = useState({
     title: '',
     amount: '',
     date: new Date().toISOString().split('T')[0],
-    category: categories[0].id,
+    category: categories[0]?.id || '',
     comment: ''
   });
   const [errors, setErrors] = useState({});
   const modalRef = useRef(null);
   const firstInputRef = useRef(null);
+  
+  // Add notifications context
+  const { checkForNewNotifications } = useNotifications();
 
   useEffect(() => {
     if (firstInputRef.current) {
@@ -86,7 +90,7 @@ const ExpenseModal = ({ onClose, onSave, categories }) => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     
     if (validateForm()) {
@@ -98,7 +102,14 @@ const ExpenseModal = ({ onClose, onSave, categories }) => {
       };
       
       // Call the onSave callback
-      onSave(formattedData);
+      await onSave(formattedData);
+      
+      // Check for new notifications after adding expense
+      setTimeout(() => {
+        checkForNewNotifications();
+      }, 500); // Small delay to allow backend to process
+      
+      onClose();
     }
   };
 
@@ -178,9 +189,9 @@ const ExpenseModal = ({ onClose, onSave, categories }) => {
               </select>
               <div 
                 className="selected-category-indicator" 
-                style={{ backgroundColor: selectedCategory.color + '20', color: selectedCategory.color }}
+                style={{ backgroundColor: selectedCategory?.color + '20', color: selectedCategory?.color }}
               >
-                <span className="category-icon">{selectedCategory.icon}</span> {selectedCategory.name}
+                <span className="category-icon">{selectedCategory?.icon}</span> {selectedCategory?.name}
               </div>
             </div>
             {errors.category && <div className="error-message">{errors.category}</div>}

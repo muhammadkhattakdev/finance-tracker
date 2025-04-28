@@ -8,9 +8,8 @@ function App() {
   return (
     <>
       <Router />
-      <ToastContainer />
     </>
   )
-}
+};
 
 export default App

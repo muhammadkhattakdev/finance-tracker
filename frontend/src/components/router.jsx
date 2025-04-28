@@ -1,7 +1,6 @@
 import React from "react";
 import { Route, Routes } from "react-router-dom";
 import HomeLayout from "./layouts/homeLayout/layout";
-import LandingPage from "./pages/homepage/homepage";
 import LoginPage from "./pages/login/login";
 import RegisterPage from "./pages/register/register";
 import ProtectedRoute from "./utils/protectedRoute";
@@ -11,15 +10,22 @@ import ExpensesPage from "./pages/dashboardPages/expensesPage/expensesPage";
 import BankConnectionPage from "./pages/dashboardPages/connectBankPage/connectBankPage";
 import AnalyticsPage from "./pages/dashboardPages/analyticsPage/analyticsPage";
 import NotificationsPage from "./pages/dashboardPages/notificationsPage/notificationsPage";
+import FeaturesPage from "./pages/featuresPage/featuresPage";
+import HomePage from "./pages/homepage/homepage";
+import HowToUsePage from "./pages/howToUsePage/howToUse";
+import NotFoundPage from "./pages/notFound/notFound";
 
 export default function Router() {
     return (
         <>
             <Routes>
                 <Route path="/" element={<HomeLayout />}>
-                    <Route index element={<LandingPage />} />
+                    <Route index element={<HomePage />} />
                     <Route path="login" element={<LoginPage />} />
                     <Route path="register" element={<RegisterPage />} />
+                    <Route path="features" element={<FeaturesPage />} />
+                    <Route path="how-to-use" element={<HowToUsePage />} />
+                <Route path="*" element={<NotFoundPage />} />
                 </Route>
 
                 <Route element={<ProtectedRoute />}>
@@ -31,8 +37,8 @@ export default function Router() {
                         <Route path="notifications" element={<NotificationsPage />} />
                     </Route>
                 </Route>
+
                 
-                <Route path="*" element={<div>Page Not Found</div>} />
             </Routes>
         </>
     );

@@ -1,8 +1,9 @@
 import React from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import "./style.css";
 import { useAuth } from "../../../context/authContext";
 import NotificationDropdown from "../notificationDropdown/notificationDropdown";
+import { useNotifications } from "../../../context/notificationsContext";
 
 const DashboardIcon = () => (
   <svg
@@ -283,115 +284,120 @@ const LogoutIcon = () => (
 );
 
 const Sidebar = ({ mobileOpen, setMobileOpen, collapsed, toggleSidebar }) => {
-  const { currentUser, logout } = useAuth();
-  const location = useLocation();
-  const navigate = useNavigate();
-
-  const navItems = [
-    { path: "/dashboard", name: "Dashboard", icon: <DashboardIcon /> },
-    { path: "/dashboard/expenses", name: "Expenses", icon: <ExpensesIcon /> },
-    { path: "/dashboard/analytics", name: "Expense Analytics", icon: <AnalyticsIcon /> },
-    { path: "/dashboard/banks", name: "Connect to Bank", icon: <BankIcon /> },
-    { path: "/dashboard/notifications", name: "Notifications", icon: <NotificationsIcon /> },
-    { path: "/profile", name: "Profile", icon: <ProfileIcon /> },
-  ];
-
-  const handleLogout = async () => {
-    try {
-      await logout();
-      navigate("/login");
-    } catch (error) {
-      console.error("Logout failed:", error);
-    }
-  };
-
-  return (
-    <>
-      {/* Sidebar */}
-      <aside
-        className={`sidebar ${collapsed ? "collapsed" : ""} ${
-          mobileOpen ? "mobile-open" : ""
-        } ${window.innerWidth < 768 && !mobileOpen ? "mobile-hidden" : ""}`}
-      >
-        <div className="sidebar-header">
-          <div className="logo-container">
-            <div className="logo-icon-wrapper">
-              <span className="logo-icon">FT</span>
+    const { currentUser, logout } = useAuth();
+    const { unreadCount } = useNotifications();
+    const location = useLocation();
+    const navigate = useNavigate();
+  
+    const navItems = [
+      { path: "/dashboard", name: "Dashboard", icon: <DashboardIcon /> },
+      { path: "/dashboard/expenses", name: "Expenses", icon: <ExpensesIcon /> },
+      { path: "/dashboard/analytics", name: "Expense Analytics", icon: <AnalyticsIcon /> },
+      { path: "/dashboard/banks", name: "Connect to Bank", icon: <BankIcon /> },
+      { 
+        path: "/dashboard/notifications", 
+        name: "Notifications", 
+        icon: <NotificationsIcon />,
+        badge: unreadCount > 0 ? unreadCount : null
+      },
+      { path: "/profile", name: "Profile", icon: <ProfileIcon /> },
+    ];
+  
+    const handleLogout = async () => {
+      try {
+        await logout();
+        navigate("/login");
+      } catch (error) {
+        console.error("Logout failed:", error);
+      }
+    };
+  
+    return (
+      <>
+        <aside
+          className={`sidebar ${collapsed ? "collapsed" : ""} ${
+            mobileOpen ? "mobile-open" : ""
+          } ${window.innerWidth < 768 && !mobileOpen ? "mobile-hidden" : ""}`}
+        >
+          <div className="sidebar-header">
+            <div className="logo-container">
+              <div className="logo-icon-wrapper">
+                <span className="logo-icon">FT</span>
+              </div>
+              {(!collapsed || mobileOpen) && (
+                <h1 className="logo-text">Finance Tracker</h1>
+              )}
+            </div>
+            <button
+              className="collapse-button"
+              onClick={toggleSidebar}
+              aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+            >
+              {collapsed ? "→" : "←"}
+            </button>
+          </div>
+  
+          <div className="sidebar-user">
+            <div className="avatar">
+              {currentUser?.first_name?.charAt(0) || "U"}
+              {currentUser?.last_name?.charAt(0) || "S"}
             </div>
             {(!collapsed || mobileOpen) && (
-              <h1 className="logo-text">Finance Tracker</h1>
+              <div className="user-info">
+                <h3 className="user-name">
+                  {currentUser?.first_name || "User"}{" "}
+                  {currentUser?.last_name || ""}
+                </h3>
+                <p className="user-email">
+                  {currentUser?.email || "user@example.com"}
+                </p>
+              </div>
             )}
           </div>
-          <button
-            className="collapse-button"
-            onClick={toggleSidebar}
-            aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-          >
-            {collapsed ? "→" : "←"}
-          </button>
-        </div>
-
-        <div className="sidebar-user">
-          <div className="avatar">
-            {currentUser?.first_name?.charAt(0) || "U"}
-            {currentUser?.last_name?.charAt(0) || "S"}
-          </div>
-          {(!collapsed || mobileOpen) && (
-            <div className="user-info">
-              <h3 className="user-name">
-                {currentUser?.first_name || "User"}{" "}
-                {currentUser?.last_name || ""}
-              </h3>
-              <p className="user-email">
-                {currentUser?.email || "user@example.com"}
-              </p>
-            </div>
-          )}
-          <div className="sidebar-notification">
-            {/* <NotificationDropdown /> */}
-          </div>
-        </div>
-
-        <nav className="sidebar-nav">
-          <ul>
-            {navItems.map((item) => (
-              <li key={item.path}>
-                <a
-                  href={item.path}
-                  className={location.pathname === item.path ? "active" : ""}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    navigate(item.path);
-                    if (mobileOpen) setMobileOpen(false);
-                  }}
-                >
-                  <span className="nav-icon">{item.icon}</span>
-                  {(!collapsed || mobileOpen) && (
-                    <span className="nav-text">{item.name}</span>
-                  )}
-                  {(!collapsed || mobileOpen) &&
-                    location.pathname === item.path && (
-                      <span className="active-indicator"></span>
+  
+          <nav className="sidebar-nav">
+            <ul>
+              {navItems.map((item) => (
+                <li key={item.path}>
+                  <Link
+                    href={item.path}
+                    className={location.pathname === item.path ? "active" : ""}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      navigate(item.path);
+                      if (mobileOpen) setMobileOpen(false);
+                    }}
+                  >
+                    <span className="nav-icon">{item.icon}</span>
+                    {(!collapsed || mobileOpen) && (
+                      <span className="nav-text">{item.name}</span>
                     )}
-                </a>
-              </li>
-            ))}
-          </ul>
-        </nav>
-
-        <div className="sidebar-footer">
-          <button className="logout-button" onClick={handleLogout}>
-            <span className="nav-icon">
-              <LogoutIcon />
-            </span>
-            {(!collapsed || mobileOpen) && (
-              <span className="nav-text">Logout</span>
-            )}
-          </button>
-        </div>
-      </aside>
-    </>
-  );
-};
-
-export default Sidebar;
+                    {item.badge && (
+                      <span className="nav-badge">{item.badge}</span>
+                    )}
+                    {(!collapsed || mobileOpen) &&
+                      location.pathname === item.path && (
+                        <span className="active-indicator"></span>
+                      )}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </nav>
+  
+          <div className="sidebar-footer">
+            <button className="logout-button" onClick={handleLogout}>
+              <span className="nav-icon">
+                <LogoutIcon />
+              </span>
+              {(!collapsed || mobileOpen) && (
+                <span className="nav-text">Logout</span>
+              )}
+            </button>
+          </div>
+        </aside>
+      </>
+    );
+  };
+  
+  export default Sidebar;

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './style.css';
 import Request from '../../../utils/request';
+import { useNotifications } from '../../../../context/notificationsContext';
 
 const NotificationIcon = () => (
   <svg
@@ -27,23 +28,26 @@ const NotificationIcon = () => (
   </svg>
 );
 
+
 const CheckmarkIcon = () => (
-  <svg 
-    width="20" 
-    height="20" 
-    viewBox="0 0 20 20" 
-    fill="none" 
-    xmlns="http://www.w3.org/2000/svg"
-  >
-    <path 
-      d="M16.6667 5L7.50004 14.1667L3.33337 10" 
-      stroke="currentColor" 
-      strokeWidth="2" 
-      strokeLinecap="round" 
-      strokeLinejoin="round"
-    />
-  </svg>
-);
+    <svg 
+      width="20" 
+      height="20" 
+      viewBox="0 0 20 20" 
+      fill="none" 
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+      role="img"
+    >
+      <path 
+        d="M16.6667 5L7.50004 14.1667L3.33337 10" 
+        stroke="currentColor" 
+        strokeWidth="2" 
+        strokeLinecap="round" 
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
 
 const BudgetAlertIcon = () => (
   <svg 
@@ -243,6 +247,15 @@ const NotificationsPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState('all'); // 'all', 'unread', 'read'
+  
+  // Use the notifications context instead of local state for unread count
+  const { 
+    unreadCount, 
+    loading,
+    markAsRead, 
+    markAllAsRead,
+    fetchUnreadCount
+  } = useNotifications();
 
   useEffect(() => {
     fetchNotifications();
@@ -254,6 +267,9 @@ const NotificationsPage = () => {
       const response = await Request.get('/notifications/');
       setNotifications(response.data);
       setError(null);
+      
+      // Update the unread count in the context
+      fetchUnreadCount();
     } catch (err) {
       console.error('Error fetching notifications:', err);
       setError('Failed to load notifications. Please try again later.');
@@ -263,9 +279,9 @@ const NotificationsPage = () => {
   };
 
   const handleMarkAsRead = async (notificationId) => {
-    try {
-      await Request.post(`/notifications/${notificationId}/mark_as_read/`);
-      
+    const success = await markAsRead(notificationId);
+    
+    if (success) {
       // Update the local state
       setNotifications(prevNotifications => 
         prevNotifications.map(notification => 
@@ -274,21 +290,17 @@ const NotificationsPage = () => {
             : notification
         )
       );
-    } catch (err) {
-      console.error('Error marking notification as read:', err);
     }
   };
 
   const handleMarkAllAsRead = async () => {
-    try {
-      await Request.post('/notifications/mark_all_as_read/');
-      
+    const success = await markAllAsRead();
+    
+    if (success) {
       // Update the local state
       setNotifications(prevNotifications => 
         prevNotifications.map(notification => ({ ...notification, is_read: true }))
       );
-    } catch (err) {
-      console.error('Error marking all notifications as read:', err);
     }
   };
 
@@ -299,9 +311,6 @@ const NotificationsPage = () => {
     if (activeTab === 'read') return notification.is_read;
     return true;
   });
-
-  // Count unread notifications
-  const unreadCount = notifications.filter(notification => !notification.is_read).length;
 
   return (
     <div className="notifications-page">

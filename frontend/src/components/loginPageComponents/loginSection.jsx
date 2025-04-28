@@ -3,10 +3,9 @@ import { Form, Formik } from 'formik';
 import { Link, useNavigate } from 'react-router-dom';
 import * as Yup from 'yup';
 import Input from './input';
-import Button from './button';
 import Request from '../utils/request';
+import './style.css';
 
-// Validation schema
 const LoginSchema = Yup.object().shape({
   email: Yup.string()
     .email('Invalid email format')
@@ -25,16 +24,12 @@ const LoginSection = () => {
     setErrorMessage('');
     
     try {
-      // Call the login method from our Request utility
       await Request.login(values.email, values.password);
       
-      // Reset the form after successful login
       resetForm();
       
-      // Redirect to dashboard
       navigate('/dashboard');
     } catch (error) {
-      // Display error message
       setErrorMessage(error.message || 'Login failed. Please check your credentials.');
     } finally {
       setIsLoading(false);
@@ -43,101 +38,95 @@ const LoginSection = () => {
   };
 
   return (
-    <section className="login-section d-flex align-items-center">
-      <div className="login-containerr">
-        <div className="login-box px-primary d-flex">
-          <div className="login-header d-flex align-items-center">
-            <h2 className="sign-in-text">
-              Sign in to{' '}
-              <span className="blue-text">
-                finance tracker
-              </span>
-            </h2>
-            <p className="login-info-text">
-              Manage your finances seamlessly with our powerful tracking tools.
-            </p>
-          </div>
-          
-          <Formik
-            initialValues={{
-              email: '',
-              password: '',
-            }}
-            validationSchema={LoginSchema}
-            onSubmit={handleLogin}
-          >
-            {({ isSubmitting, errors, touched }) => (
-              <Form className="login-form d-flex">
-                <div className="login-input-box d-flex">
-                  <label
-                    htmlFor="email"
-                    className="login-input-box-label"
-                  >
-                    Account
-                  </label>
+    <div className="auth-container">
+      <div className="auth-card">
+        <div className="auth-header">
+          <h1 className="auth-title">
+            Sign in to <span className="brand-highlight">finance tracker</span>
+          </h1>
+          <p className="auth-subtitle">
+            Manage your finances seamlessly with our powerful tracking tools.
+          </p>
+        </div>
+        
+        <Formik
+          initialValues={{
+            email: '',
+            password: '',
+          }}
+          validationSchema={LoginSchema}
+          onSubmit={handleLogin}
+        >
+          {({ isSubmitting, errors, touched }) => (
+            <Form className="auth-form">
+              <div className="form-group">
+                <label htmlFor="email" className="form-label">
+                  Email
+                </label>
+                <Input
+                  name="email"
+                  className="form-input"
+                  placeholder="Enter your email"
+                  aria-label="Email"
+                />
+                {errors.email && touched.email && (
+                  <div className="error-message">{errors.email}</div>
+                )}
+              </div>
+              
+              <div className="form-group">
+                <label htmlFor="password" className="form-label">
+                  Password
+                </label>
+                <div className="password-field">
                   <Input
-                    style={{ width: '100%' }}
-                    name="email"
-                    className="login-input"
-                    placeholder="Email or user name"
-                  />
-                  {errors.email && touched.email && (
-                    <div className="error-message">{errors.email}</div>
-                  )}
-                </div>
-                
-                <div className="login-input-box d-flex">
-                  <label
-                    htmlFor="password"
-                    className="login-input-box-label"
-                  >
-                    Password
-                  </label>
-                  <Input
-                    style={{ width: '100%' }}
                     name="password"
                     type="password"
-                    className="login-input"
-                    placeholder="Your password"
+                    className="form-input"
+                    placeholder="Enter your password"
+                    aria-label="Password"
                   />
-                  {errors.password && touched.password && (
-                    <div className="error-message">{errors.password}</div>
-                  )}
-                  <Link to="/forgot-password" className="forgot-password">
-                    Forgot password?
-                  </Link>
                 </div>
-                
-                {errorMessage && (
-                  <div className="error-alert" style={{ color: 'red' }}>
-                    {errorMessage}
-                  </div>
+                {errors.password && touched.password && (
+                  <div className="error-message">{errors.password}</div>
                 )}
-                
-                <div className="login-input-btns d-flex">
-                  <Button
-                    text={isLoading ? "Logging in..." : "Log In"}
-                    type="submit"
-                    className="btn-login"
-                    disabled={isSubmitting || isLoading}
-                  />
-
-                  <p className="question-text">
-                    Don't have an account?{' '}
-                    <Link
-                      to="/sign-up"
-                      className="account-creation-btn"
-                    >
-                      Register
-                    </Link>
-                  </p>
+                <Link to="/forgot-password" className="forgot-password">
+                  Forgot password?
+                </Link>
+              </div>
+              
+              {errorMessage && (
+                <div className="error-alert">
+                  {errorMessage}
                 </div>
-              </Form>
-            )}
-          </Formik>
+              )}
+              
+              <button
+                type="submit"
+                className="btn-auth"
+                disabled={isSubmitting || isLoading}
+              >
+                {isLoading ? (
+                  <>
+                    <span className="loading"></span>
+                    Logging in...
+                  </>
+                ) : (
+                  "Sign In"
+                )}
+              </button>
+            </Form>
+          )}
+        </Formik>
+
+        <div className="auth-alternate">
+          Don't have an account?{' '}
+          <Link to="/register" className="auth-alternate-link">
+            Create account
+          </Link>
         </div>
       </div>
-    </section>
+    </div>
   );
 };
 

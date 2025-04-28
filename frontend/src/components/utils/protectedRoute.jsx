@@ -13,12 +13,10 @@ const ProtectedRoute = () => {
     const verifyAuth = async () => {
       try {
         if (Request.isAuthenticated()) {
-          // Verify token by making a request to the user endpoint
           const response = await Request.get('/auth/user/');
           if (response.status === 200) {
             setIsAuthenticated(true);
           } else {
-            // If status is not 200, token might be invalid
             Request.logout();
             setIsAuthenticated(false);
           }
@@ -47,11 +45,9 @@ const ProtectedRoute = () => {
   }
 
   if (!isAuthenticated) {
-    // Redirect to login page with the return url
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  // If user is authenticated, render the nested routes
   return <Outlet />;
 };
 

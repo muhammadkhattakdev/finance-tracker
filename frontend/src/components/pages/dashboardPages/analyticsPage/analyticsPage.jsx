@@ -30,7 +30,6 @@ const AnalyticsPage = () => {
       setBudgetData(response.data);
       setError(null);
       
-      // If no budgets are set, automatically open the setup modal
       if (!response.data.budgets.daily && !response.data.budgets.weekly && !response.data.budgets.monthly) {
         setIsModalOpen(true);
       }
@@ -45,7 +44,7 @@ const AnalyticsPage = () => {
   const handleSaveBudgets = async (budgetValues) => {
     try {
       await Request.post('/budgets/set_budgets/', budgetValues);
-      fetchBudgetData(); // Refresh data after saving
+      fetchBudgetData();
     } catch (err) {
       console.error('Error saving budgets:', err);
       setError('Failed to save budget settings. Please try again.');
