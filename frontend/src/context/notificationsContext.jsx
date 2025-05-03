@@ -135,7 +135,9 @@ export const NotificationProvider = ({ children }) => {
     markAsRead,
     markAllAsRead,
     fetchUnreadCount,
-    checkForNewNotifications
+    checkForNewNotifications,
+    newNotifications,
+    setNewNotifications,
   };
 
   return (

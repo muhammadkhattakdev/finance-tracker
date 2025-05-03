@@ -290,7 +290,7 @@ const HomePage = () => {
         </div>
       </section>
       
-      {/* Pricing Teaser Section */}
+      {/* Pricing Teaser Section
       <section className="pricing-teaser-section">
         <div className="pricing-glass-card">
           <div className="pricing-header">
@@ -371,7 +371,7 @@ const HomePage = () => {
             <Link to="/pricing" className="text-button">View Full Pricing Details <span>→</span></Link>
           </div>
         </div>
-      </section>
+      </section> */}
       
       {/* Final CTA Section */}
       <section className="final-cta-section">
@@ -381,7 +381,6 @@ const HomePage = () => {
             <p>Join thousands of users who have transformed their financial lives</p>
             <div className="cta-buttons">
               <Link to="/register" className="primary-button">Get Started For Free</Link>
-              <Link to="/demo" className="secondary-button">Book a Demo</Link>
             </div>
           </div>
         </div>

@@ -60,28 +60,21 @@ function Footer() {
               <h3 className="footer-links-title">Product</h3>
               <ul className="footer-links-list">
                 <li><Link to="/features">Features</Link></li>
-                <li><Link to="/pricing">Pricing</Link></li>
-                <li><Link to="/integrations">Integrations</Link></li>
-                <li><Link to="/updates">Updates</Link></li>
+                <li><Link to="/dashboard/banks">Integrations</Link></li>
               </ul>
             </div>
             
             <div className="footer-links-column">
               <h3 className="footer-links-title">Resources</h3>
               <ul className="footer-links-list">
-                <li><Link to="/blog">Blog</Link></li>
-                <li><Link to="/guides">Guides</Link></li>
-                <li><Link to="/help">Help Center</Link></li>
-                <li><Link to="/community">Community</Link></li>
+                <li><Link to="/how-to-use">Guides</Link></li>
               </ul>
             </div>
             
             <div className="footer-links-column">
               <h3 className="footer-links-title">Company</h3>
               <ul className="footer-links-list">
-                <li><Link to="/about">About</Link></li>
-                <li><Link to="/team">Team</Link></li>
-                <li><Link to="/careers">Careers</Link></li>
+                <li><Link to="/features">About</Link></li>
                 <li><Link to="/contact">Contact</Link></li>
               </ul>
             </div>

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
+import { useAuth } from "../../context/authContext"; // Make sure path is correct
 import "./navbar.css";
 
 // Logo component
@@ -19,6 +20,7 @@ const Navbar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
+  const { currentUser, isAuthenticated } = useAuth();
   
   // Close mobile menu when navigating to a new page
   useEffect(() => {
@@ -71,11 +73,6 @@ const Navbar = () => {
                 How To Use
               </Link>
             </li>
-            <li className="nav-item">
-              <Link to="/pricing" className={location.pathname === '/pricing' ? 'active' : ''}>
-                Pricing
-              </Link>
-            </li>
             {/* <li className="nav-item">
               <Link to="/about" className={location.pathname === '/about' ? 'active' : ''}>
                 About
@@ -84,12 +81,20 @@ const Navbar = () => {
           </ul>
           
           <div className="nav-buttons">
-            <Link to="/login" className="login-button">
-              Login
-            </Link>
-            <Link to="/register" className="signup-button">
-              Get Started
-            </Link>
+            {isAuthenticated ? (
+              <Link to="/dashboard" className="signup-button">
+                Dashboard
+              </Link>
+            ) : (
+              <>
+                <Link to="/login" className="login-button">
+                  Login
+                </Link>
+                <Link to="/register" className="signup-button">
+                  Get Started
+                </Link>
+              </>
+            )}
           </div>
         </div>
         

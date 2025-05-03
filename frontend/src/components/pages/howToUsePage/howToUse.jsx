@@ -1,6 +1,10 @@
 import React, { useEffect } from "react";
 import { Link } from "react-router-dom";
 import "./style.css";
+import signUpImg from "../../../static/images/signup.png";
+import bankImg from "../../../static/images/bank.png";
+import analyticsImg from "../../../static/images/analytics.png";
+import budgetImg from "../../../static/images/budget.png";
 
 // Icon components
 const ConnectIcon = () => (
@@ -76,7 +80,6 @@ const HowToUsePage = () => {
       });
     };
     
-    // Initial check for elements in viewport
     setTimeout(handleScroll, 100);
     
     window.addEventListener('scroll', handleScroll);
@@ -192,7 +195,7 @@ const HowToUsePage = () => {
                     <div className="browser-title">Sign Up - Finance Tracker</div>
                   </div>
                   <div className="step-image">
-                    <img src="/images/signup-screenshot.png" alt="Sign up screen" />
+                    <img src={signUpImg} alt="Sign up screen" />
                   </div>
                 </div>
                 <div className="step-tips">
@@ -224,7 +227,7 @@ const HowToUsePage = () => {
                     <div className="browser-title">Connect Banks - Finance Tracker</div>
                   </div>
                   <div className="step-image">
-                    <img src="/images/connect-bank-screenshot.png" alt="Connect bank screen" />
+                    <img src={bankImg} alt="Connect bank screen" />
                   </div>
                 </div>
                 <div className="step-tips">
@@ -256,7 +259,7 @@ const HowToUsePage = () => {
                     <div className="browser-title">Budget Setup - Finance Tracker</div>
                   </div>
                   <div className="step-image">
-                    <img src="/images/budget-setup-screenshot.png" alt="Budget setup screen" />
+                    <img src={budgetImg} alt="Budget setup screen" />
                   </div>
                 </div>
                 <div className="step-tips">
@@ -288,7 +291,7 @@ const HowToUsePage = () => {
                     <div className="browser-title">Dashboard - Finance Tracker</div>
                   </div>
                   <div className="step-image">
-                    <img src="/images/dashboard-screenshot.png" alt="Dashboard screen" />
+                    <img src={analyticsImg} alt="Dashboard screen" />
                   </div>
                 </div>
                 <div className="step-tips">
@@ -305,7 +308,7 @@ const HowToUsePage = () => {
         </div>
       </section>
       
-      {/* Video Tutorials Section */}
+      {/* 
       <section className="video-tutorials-section">
         <div className="how-to-container">
           <div className="video-tutorials-header animate-on-scroll">
@@ -371,7 +374,7 @@ const HowToUsePage = () => {
             </div>
           </div>
         </div>
-      </section>
+      </section> */}
       
       {/* FAQ Section */}
       <section className="how-to-faq-section">

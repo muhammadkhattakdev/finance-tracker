@@ -188,20 +188,29 @@ const CATEGORIES = [
   { id: 15, name: "Other", icon: "📌", color: "#9E9E9E" },
 ];
 
-const Pagination = ({ totalItems, itemsPerPage, currentPage, onPageChange }) => {
+const Pagination = ({
+  totalItems,
+  itemsPerPage,
+  currentPage,
+  onPageChange,
+}) => {
   const totalPages = Math.ceil(totalItems / itemsPerPage);
-  
+
   if (totalPages <= 1) return null;
-  
+
   // Generate page numbers with ellipsis for large numbers of pages
   const getPageNumbers = () => {
     const pages = [];
-    
+
     // Always show first page
     pages.push(1);
-    
+
     // Current page neighborhood
-    for (let i = Math.max(2, currentPage - 1); i <= Math.min(totalPages - 1, currentPage + 1); i++) {
+    for (
+      let i = Math.max(2, currentPage - 1);
+      i <= Math.min(totalPages - 1, currentPage + 1);
+      i++
+    ) {
       if (i === 2 && currentPage > 3) {
         pages.push("...");
       } else if (i === totalPages - 1 && currentPage < totalPages - 2) {
@@ -210,42 +219,42 @@ const Pagination = ({ totalItems, itemsPerPage, currentPage, onPageChange }) => 
         pages.push(i);
       }
     }
-    
+
     // Always show last page if more than 1 page
     if (totalPages > 1) {
       pages.push(totalPages);
     }
-    
+
     // Remove duplicates and ellipsis next to each other
     return Array.from(new Set(pages)).filter((page, index, array) => {
       if (page === "..." && array[index - 1] === "...") return false;
       return true;
     });
   };
-  
+
   return (
     <div className="pagination">
-      <button 
-        className="pagination-button" 
+      <button
+        className="pagination-button"
         onClick={() => onPageChange(currentPage - 1)}
         disabled={currentPage === 1}
       >
         Previous
       </button>
-      
+
       {getPageNumbers().map((page, index) => (
         <button
           key={index}
-          className={`pagination-page ${page === currentPage ? 'active' : ''}`}
+          className={`pagination-page ${page === currentPage ? "active" : ""}`}
           onClick={() => page !== "..." && onPageChange(page)}
           disabled={page === "..."}
         >
           {page}
         </button>
       ))}
-      
-      <button 
-        className="pagination-button" 
+
+      <button
+        className="pagination-button"
         onClick={() => onPageChange(currentPage + 1)}
         disabled={currentPage === totalPages}
       >
@@ -265,7 +274,7 @@ const ExpensesPage = () => {
   const [sourceFilter, setSourceFilter] = useState(null);
   const [error, setError] = useState(null);
   const [syncing, setSyncing] = useState(false);
-  
+
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
@@ -280,28 +289,31 @@ const ExpensesPage = () => {
     try {
       // Build query parameters for filtering and pagination
       let queryParams = new URLSearchParams();
-      
+
       // Add pagination parameters
-      queryParams.append('page', currentPage);
-      queryParams.append('page_size', itemsPerPage);
-      
+      queryParams.append("page", currentPage);
+      queryParams.append("page_size", itemsPerPage);
+
       // Add search parameter if present
       if (searchQuery) {
-        queryParams.append('search', searchQuery);
+        queryParams.append("search", searchQuery);
       }
-      
+
       if (selectedCategory) {
-        queryParams.append('category', selectedCategory);
+        queryParams.append("category", selectedCategory);
       }
-      
+
       if (sourceFilter) {
-        queryParams.append('source', sourceFilter);
+        queryParams.append("source", sourceFilter);
       }
-      
-      const response = await Request.get(`/expenses/?${queryParams.toString()}`);
-      
+
+      const response = await Request.get(
+        `/expenses/?${queryParams.toString()}`
+      );
+
       // If the response includes pagination info
       if (response.data.results) {
+        console.log(response.data.results);
         setExpenses(response.data.results);
         setTotalItems(response.data.count);
       } else {
@@ -309,7 +321,7 @@ const ExpensesPage = () => {
         setExpenses(response.data);
         setTotalItems(response.data.length);
       }
-      
+
       setError(null);
     } catch (err) {
       console.error("Error fetching expenses:", err);
@@ -349,54 +361,57 @@ const ExpensesPage = () => {
   const handleSyncTransactions = async () => {
     setSyncing(true);
     try {
-      await Request.post('/plaid/sync_transactions/');
+      await Request.post("/plaid/sync_transactions/");
       await fetchExpenses(); // Refresh after sync
       setError(null);
     } catch (err) {
-      console.error('Error syncing transactions:', err);
-      setError('Failed to sync transactions. Please try again.');
+      console.error("Error syncing transactions:", err);
+      setError("Failed to sync transactions. Please try again.");
     } finally {
       setSyncing(false);
     }
   };
-  
+
   const handleExport = async (startDate, endDate) => {
     try {
       // Build query parameters for the export
       let queryParams = new URLSearchParams();
-      
+
       // Add date range
-      queryParams.append('start_date', startDate);
-      queryParams.append('end_date', endDate);
-      
+      queryParams.append("start_date", startDate);
+      queryParams.append("end_date", endDate);
+
       // Add other active filters
       if (searchQuery) {
-        queryParams.append('search', searchQuery);
+        queryParams.append("search", searchQuery);
       }
-      
+
       if (selectedCategory) {
-        queryParams.append('category', selectedCategory);
+        queryParams.append("category", selectedCategory);
       }
-      
+
       if (sourceFilter) {
-        queryParams.append('source', sourceFilter);
+        queryParams.append("source", sourceFilter);
       }
-      
+
       // Make a GET request to export endpoint with responseType 'blob'
-      const response = await Request.get(`/expenses/export/?${queryParams.toString()}`, {
-        responseType: 'blob'
-      });
-      
+      const response = await Request.get(
+        `/expenses/export/?${queryParams.toString()}`,
+        {
+          responseType: "blob",
+        }
+      );
+
       // Create a download link and trigger download
       const url = window.URL.createObjectURL(new Blob([response.data]));
-      const link = document.createElement('a');
+      const link = document.createElement("a");
       link.href = url;
       const fileName = `expenses_${startDate}_to_${endDate}.csv`;
-      link.setAttribute('download', fileName);
+      link.setAttribute("download", fileName);
       document.body.appendChild(link);
       link.click();
       link.remove();
-      
+
       // Close the export modal
       setIsExportModalOpen(false);
     } catch (err) {
@@ -409,8 +424,8 @@ const ExpensesPage = () => {
     setCurrentPage(page);
     // Scroll to top of the table when changing pages
     window.scrollTo({
-      top: document.querySelector('.expenses-table-container').offsetTop - 80,
-      behavior: 'smooth'
+      top: document.querySelector(".expenses-table-container").offsetTop - 80,
+      behavior: "smooth",
     });
   };
 
@@ -440,7 +455,7 @@ const ExpensesPage = () => {
 
   const getCategoryById = (categoryId) => {
     const category = CATEGORIES.find((cat) => cat.id === categoryId);
-    return category || { name: "Unknown", icon: "❓", color: "#9E9E9E" };
+    return category || { name: "", icon: "-", color: "#9E9E9E" };
   };
 
   return (
@@ -472,9 +487,9 @@ const ExpensesPage = () => {
                 ×
               </button>
             )}
-            <button type="submit" style={{ display: 'none' }}></button>
+            <button type="submit" style={{ display: "none" }}></button>
           </form>
-          
+
           <div className="category-filter">
             <FilterIcon />
             <select
@@ -495,7 +510,7 @@ const ExpensesPage = () => {
               ))}
             </select>
           </div>
-          
+
           <div className="source-filter">
             <FilterIcon />
             <select
@@ -511,17 +526,17 @@ const ExpensesPage = () => {
               <option value="plaid">Bank Transactions</option>
             </select>
           </div>
-          
-          <button 
-            className="export-button" 
+
+          <button
+            className="export-button"
             onClick={() => setIsExportModalOpen(true)}
           >
             <ExportIcon />
             <span>Export</span>
           </button>
-          
-          <button 
-            className={`sync-button ${syncing ? 'syncing' : ''}`} 
+
+          <button
+            className={`sync-button ${syncing ? "syncing" : ""}`}
             onClick={handleSyncTransactions}
             disabled={syncing}
           >
@@ -537,7 +552,7 @@ const ExpensesPage = () => {
               </>
             )}
           </button>
-          
+
           <button
             className="add-expense-button"
             onClick={() => setIsModalOpen(true)}
@@ -612,7 +627,9 @@ const ExpensesPage = () => {
                                 ? "#4CAF5020"
                                 : "#9C27B020",
                             color:
-                              expense.source === "plaid" ? "#4CAF50" : "#9C27B0",
+                              expense.source === "plaid"
+                                ? "#4CAF50"
+                                : "#9C27B0",
                           }}
                         >
                           {expense.source === "plaid" ? "Bank" : "Manual"}
@@ -647,7 +664,7 @@ const ExpensesPage = () => {
                 })}
               </tbody>
             </table>
-            
+
             <Pagination
               totalItems={totalItems}
               itemsPerPage={itemsPerPage}
@@ -665,7 +682,7 @@ const ExpensesPage = () => {
           categories={CATEGORIES}
         />
       )}
-      
+
       {isExportModalOpen && (
         <ExportModal
           onClose={() => setIsExportModalOpen(false)}

@@ -14,6 +14,7 @@ import FeaturesPage from "./pages/featuresPage/featuresPage";
 import HomePage from "./pages/homepage/homepage";
 import HowToUsePage from "./pages/howToUsePage/howToUse";
 import NotFoundPage from "./pages/notFound/notFound";
+import ProfilePage from "./pages/dashboardPages/profilePage/profilePage";
 
 export default function Router() {
     return (
@@ -35,6 +36,7 @@ export default function Router() {
                         <Route path="banks" element={<BankConnectionPage />} />
                         <Route path="analytics" element={<AnalyticsPage />} />
                         <Route path="notifications" element={<NotificationsPage />} />
+                        <Route path="profile" element={<ProfilePage />} />
                     </Route>
                 </Route>
 

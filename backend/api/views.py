@@ -595,12 +595,12 @@ class BudgetViewSet(viewsets.ModelViewSet):
             budgets[budget.period] = float(budget.amount)
         
         start_of_day = timezone.make_aware(datetime.combine(today, datetime.min.time()))
-        
+
         start_of_week = today - timedelta(days=today.weekday())
         start_of_week = timezone.make_aware(datetime.combine(start_of_week, datetime.min.time()))
-        
+
         start_of_month = timezone.make_aware(datetime.combine(today.replace(day=1), datetime.min.time()))
-        
+
         daily_spending = Expense.objects.filter(
             user=user, date=today
         ).aggregate(total=Sum('amount'))['total'] or 0
@@ -792,6 +792,26 @@ class BudgetViewSet(viewsets.ModelViewSet):
 
 
 
+@api_view(['POST'])
+@permission_classes([permissions.IsAuthenticated])
+def unlink_bank_endpoint(request, pk):
+    """Unlink a bank connection"""
+    try:
+        item = PlaidItem.objects.get(id=pk, user=request.user)
+        
+        accounts = PlaidAccount.objects.filter(plaid_item=item)
+        for account in accounts:
+            PlaidTransaction.objects.filter(account=account).delete()
+        accounts.delete()
+        
+        # Delete the item
+        item.delete()
+        
+        return Response({"success": True, "message": "Bank account successfully disconnected"})
+    except PlaidItem.DoesNotExist:
+        return Response({"error": "Bank connection not found"}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 
