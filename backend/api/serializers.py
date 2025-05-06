@@ -16,10 +16,16 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ['id', 'email', 'first_name', 'last_name']
         read_only_fields = ['id']
 
-
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):
-        # Skip password validation during login - this only authenticates
+        email = attrs.get(self.username_field)
+        user = User.objects.filter(email=email).first()
+
+        if user and not user.is_active:
+            raise serializers.ValidationError(
+                {"detail": "Account not verified"}
+            )
+        
         data = super().validate(attrs)
         user_serializer = UserSerializer(self.user)
         data.update(user_serializer.data)
@@ -189,3 +195,9 @@ class NotificationSerializer(serializers.ModelSerializer):
             return obj.created_at.strftime('%b %d, %Y')
 
 
+class VerifyEmailSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    code = serializers.CharField(max_length=6, min_length=6)
+
+class ResendVerificationSerializer(serializers.Serializer):
+    email = serializers.EmailField()

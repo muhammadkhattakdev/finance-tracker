@@ -22,6 +22,8 @@ from plaid.model.products import Products
 from plaid.model.country_code import CountryCode
 from plaid.model.accounts_get_request import AccountsGetRequest
 from plaid.model.transactions_sync_request import TransactionsSyncRequest
+from .utils import create_verification_code
+
 from rest_framework.views import APIView
 from rest_framework.decorators import api_view, permission_classes
 
@@ -35,7 +37,6 @@ class StandardResultsSetPagination(PageNumberPagination):
 class CustomTokenObtainPairView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
 
-
 class RegisterView(generics.CreateAPIView):
     serializer_class = RegisterSerializer
 
@@ -43,14 +44,20 @@ class RegisterView(generics.CreateAPIView):
         serializer = self.get_serializer(data=request.data)
         
         if not serializer.is_valid():
-
             print(f"Registration validation errors: {serializer.errors}")
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
             
         try:
             user = serializer.save()
+            user.is_active = False
+            user.save()
+            
+            create_verification_code(user)
             user_data = UserSerializer(user).data
-            return Response(user_data, status=status.HTTP_201_CREATED)
+            return Response({
+                **user_data,
+                'message': 'Registration successful. Please check your email for verification code.'
+            }, status=status.HTTP_201_CREATED)
         except Exception as e:
             print(f"Exception during user registration: {str(e)}")
 
@@ -905,3 +912,97 @@ def create_budget_notification(user, budget_type, percentage, current_amount, bu
             'budget_limit': budget_limit
         }
     )
+
+
+
+
+
+
+
+
+class VerifyEmailView(APIView):
+    def post(self, request):
+        serializer = VerifyEmailSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+        email = serializer.validated_data['email']
+        code = serializer.validated_data['code']
+        
+        try:
+            user = User.objects.get(email=email)
+            verification = EmailVerification.objects.filter(
+                user=user,
+                code=code,
+                is_used=False,
+                expires_at__gt=timezone.now()
+            ).order_by('-created_at').first()
+            
+            if not verification:
+                return Response(
+                    {"detail": "Invalid or expired verification code."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            # Mark verification as used
+            verification.is_used = True
+            verification.save()
+            
+            # Activate user
+            user.is_active = True
+            user.save()
+            
+            # Return success
+            return Response(
+                {"message": "Email verified successfully. You can now log in."},
+                status=status.HTTP_200_OK
+            )
+        except User.DoesNotExist:
+            return Response(
+                {"detail": "User with this email does not exist."},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+class ResendVerificationView(APIView):
+    def post(self, request):
+        serializer = ResendVerificationSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+        email = serializer.validated_data['email']
+        
+        try:
+            user = User.objects.get(email=email)
+            if user.is_active:
+                return Response(
+                    {"detail": "Your email is already verified."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            # Check if there are recent unverified codes
+            recent_code = EmailVerification.objects.filter(
+                user=user,
+                is_used=False,
+                expires_at__gt=timezone.now()
+            ).exists()
+            
+            if recent_code:
+                return Response(
+                    {"detail": "A verification code was recently sent. Please wait before requesting a new one."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            # Create new verification code and send email
+            from .utils import create_verification_code
+            create_verification_code(user)
+            
+            return Response(
+                {"message": "A new verification code has been sent to your email."},
+                status=status.HTTP_200_OK
+            )
+        except User.DoesNotExist:
+            return Response(
+                {"detail": "User with this email does not exist."},
+                status=status.HTTP_404_NOT_FOUND
+            )
+

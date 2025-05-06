@@ -21,6 +21,8 @@ urlpatterns = [
     path('auth/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('auth/register/', RegisterView.as_view(), name='register'),
     path('auth/user/', UserDetailView.as_view(), name='user_detail'),
+    path('auth/verify-email/', VerifyEmailView.as_view(), name='verify-email'),
+    path('auth/resend-verification/', ResendVerificationView.as_view(), name='resend-verification'),
     
     # Plaid endpoints
     path('plaid/create_link_token/', CreateLinkTokenView.as_view(), name='create-link-token'),

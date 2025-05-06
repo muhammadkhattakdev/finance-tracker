@@ -35,6 +35,11 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'backend.urls'
 
+
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'  # This sends emails to console for development
+DEFAULT_FROM_EMAIL = 'noreply@financetracker.com'
+
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
