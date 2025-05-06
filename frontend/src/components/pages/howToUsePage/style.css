@@ -1,11 +1,12 @@
 .how-to-use-page {
   color: var(--text-color);
+  box-sizing: border-box;
 }
 
 .how-to-container {
   margin: 0 auto;
   padding: 0 2rem;
-  max-width: 100vw;
+  width: 100vw;
 }
 
 .how-to-header-section {

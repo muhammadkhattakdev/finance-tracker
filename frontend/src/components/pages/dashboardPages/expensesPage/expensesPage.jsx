@@ -271,50 +271,52 @@ const ExpensesPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
   const itemsPerPage = 30;
-  
+
   // Use refs to track actual filter state
   const currentFilters = useRef({
     category: null,
     source: null,
     search: "",
-    page: 1
+    page: 1,
   });
 
   // Function to fetch expenses with current filters
   const fetchExpenses = async () => {
     setIsLoading(true);
-    
+
     try {
       // Build query parameters based on current filters
       let queryParams = new URLSearchParams();
-      
+
       // Always include pagination
       queryParams.append("page", currentFilters.current.page);
       queryParams.append("page_size", itemsPerPage);
-      
+
       // Add search if present
       if (currentFilters.current.search) {
         queryParams.append("search", currentFilters.current.search);
       }
-      
+
       // Add category if selected
       if (currentFilters.current.category !== null) {
         queryParams.append("category", currentFilters.current.category);
       }
-      
+
       // Handle source filter
       if (currentFilters.current.source === "plaid") {
         // For plaid, use server-side filtering
         queryParams.append("source", "plaid");
       }
-      
+
       // Make API request
-      const response = await Request.get(`/expenses/?${queryParams.toString()}`);
-      
+      const response = await Request.get(
+        `/expenses/?${queryParams.toString()}`
+      );
+
       // Process response
       let fetchedExpenses;
       let totalCount;
-      
+
       if (response.data.results) {
         // Paginated response
         fetchedExpenses = response.data.results;
@@ -324,17 +326,19 @@ const ExpensesPage = () => {
         fetchedExpenses = response.data;
         totalCount = fetchedExpenses.length;
       }
-      
+
       // Apply client-side filtering for manual source
       if (currentFilters.current.source === "manual") {
-        const manualExpenses = fetchedExpenses.filter(expense => expense.source !== "plaid");
+        const manualExpenses = fetchedExpenses.filter(
+          (expense) => expense.source !== "plaid"
+        );
         setExpenses(manualExpenses);
         setTotalItems(manualExpenses.length);
       } else {
         setExpenses(fetchedExpenses);
         setTotalItems(totalCount);
       }
-      
+
       setError(null);
     } catch (err) {
       console.error("Error fetching expenses:", err);
@@ -347,16 +351,16 @@ const ExpensesPage = () => {
   // Initialize data on mount
   useEffect(() => {
     fetchExpenses();
-    
+
     // Set up auto-refresh interval
     const intervalId = setInterval(() => {
       console.log("Auto-refreshing expenses data");
       fetchExpenses();
     }, 15 * 60 * 1000); // 15 minutes
-    
+
     return () => clearInterval(intervalId);
   }, []);
-  
+
   // Apply filters immediately when they change
   useEffect(() => {
     // Update the ref with latest filter values
@@ -364,9 +368,9 @@ const ExpensesPage = () => {
       category: selectedCategory,
       source: sourceFilter,
       search: searchQuery,
-      page: currentPage
+      page: currentPage,
     };
-    
+
     // Fetch with new filters
     fetchExpenses();
   }, [selectedCategory, sourceFilter, searchQuery, currentPage]);
@@ -415,52 +419,52 @@ const ExpensesPage = () => {
   const handleExport = async (startDate, endDate) => {
     try {
       const queryParams = new URLSearchParams();
-      
+
       // Add date range
       queryParams.append("start_date", startDate);
       queryParams.append("end_date", endDate);
-      
+
       // Add filters
       if (currentFilters.current.search) {
         queryParams.append("search", currentFilters.current.search);
       }
-      
+
       if (currentFilters.current.category !== null) {
         queryParams.append("category", currentFilters.current.category);
       }
-      
+
       // Only include source filter for plaid
       if (currentFilters.current.source === "plaid") {
         queryParams.append("source", currentFilters.current.source);
       }
-      
+
       // Make export request
       const response = await Request.get(
         `/expenses/export/?${queryParams.toString()}`,
         { responseType: "blob" }
       );
-      
+
       let blobData = response.data;
-      
+
       // Process CSV for manual filter
       if (currentFilters.current.source === "manual") {
         const text = await response.data.text();
-        const lines = text.split('\n');
+        const lines = text.split("\n");
         const header = lines[0];
         const filteredLines = [header];
-        
+
         // Filter out plaid entries
         for (let i = 1; i < lines.length; i++) {
           const line = lines[i].trim();
-          if (line && !line.includes('"plaid"') && !line.includes(',plaid,')) {
+          if (line && !line.includes('"plaid"') && !line.includes(",plaid,")) {
             filteredLines.push(line);
           }
         }
-        
-        const filteredText = filteredLines.join('\n');
-        blobData = new Blob([filteredText], { type: 'text/csv' });
+
+        const filteredText = filteredLines.join("\n");
+        blobData = new Blob([filteredText], { type: "text/csv" });
       }
-      
+
       // Create download link
       const url = window.URL.createObjectURL(blobData);
       const link = document.createElement("a");
@@ -469,7 +473,7 @@ const ExpensesPage = () => {
       document.body.appendChild(link);
       link.click();
       link.remove();
-      
+
       // Close modal
       setIsExportModalOpen(false);
     } catch (err) {
@@ -480,7 +484,7 @@ const ExpensesPage = () => {
 
   const handlePageChange = (page) => {
     setCurrentPage(page);
-    
+
     // Scroll to top of table
     window.scrollTo({
       top: document.querySelector(".expenses-table-container").offsetTop - 80,
@@ -676,7 +680,7 @@ const ExpensesPage = () => {
                         </div>
                       </td>
                       <td className="amount-cell">
-                      £{parseFloat(expense.amount).toFixed(2)}
+                        £{parseFloat(expense.amount).toFixed(2)}
                       </td>
                       <td>{format(new Date(expense.date), "dd MMM yyyy")}</td>
                       <td>
