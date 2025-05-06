@@ -44,16 +44,14 @@ const SignUp = () => {
       };
       
       // Call the register method from our Request utility
-      await Request.register(userData);
+      const response = await Request.register(userData);
       
       // Reset the form after successful registration
       resetForm();
       
-      // Redirect to login page
-      navigate('/login', { 
-        state: { 
-          message: 'Registration successful! Please log in with your new account.' 
-        } 
+      // Redirect to email verification page with the email
+      navigate('/verify-email', { 
+        state: { email: values.email }
       });
     } catch (error) {
       // Display error message

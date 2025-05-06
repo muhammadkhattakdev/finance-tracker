@@ -7,6 +7,9 @@ const AUTH_LOGIN_ENDPOINT = import.meta.env.VITE_AUTH_LOGIN_ENDPOINT || '/auth/t
 const AUTH_REGISTER_ENDPOINT = import.meta.env.VITE_AUTH_REGISTER_ENDPOINT || '/auth/register/';
 const AUTH_USER_ENDPOINT = import.meta.env.VITE_AUTH_USER_ENDPOINT || '/auth/user/';
 const AUTH_REFRESH_ENDPOINT = import.meta.env.VITE_AUTH_REFRESH_ENDPOINT || '/auth/token/refresh/';
+// New email verification endpoints
+const AUTH_VERIFY_EMAIL_ENDPOINT = import.meta.env.VITE_AUTH_VERIFY_EMAIL_ENDPOINT || '/auth/verify-email/';
+const AUTH_RESEND_VERIFICATION_ENDPOINT = import.meta.env.VITE_AUTH_RESEND_VERIFICATION_ENDPOINT || '/auth/resend-verification/';
 
 
 const axiosInstance = axios.create({
@@ -183,7 +186,16 @@ const Request = {
       
       return response.data;
     } catch (error) {
-      throw formatError(error);
+      // Check if error is related to unverified account
+      if (error.status === 401 && 
+          (error.message === 'Account not verified' || 
+           error.details?.detail === 'Account not verified')) {
+        throw { 
+          ...error, 
+          message: 'Account not verified' 
+        };
+      }
+      throw error;
     }
   },
   
@@ -199,6 +211,29 @@ const Request = {
     }
   },
   
+  // New email verification methods
+  verifyEmail: async (email, code) => {
+    try {
+      const response = await axiosInstance.post(AUTH_VERIFY_EMAIL_ENDPOINT, { email, code });
+      console.log('Email verification success:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('Email verification error:', error.response?.data || error.message);
+      throw formatError(error);
+    }
+  },
+  
+  resendVerification: async (email) => {
+    try {
+      const response = await axiosInstance.post(AUTH_RESEND_VERIFICATION_ENDPOINT, { email });
+      console.log('Resend verification success:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('Resend verification error:', error.response?.data || error.message);
+      throw formatError(error);
+    }
+  },
+  
   logout: () => {
     clearAuth();
   },
@@ -207,7 +242,6 @@ const Request = {
     return !!localStorage.getItem(AUTH_TOKEN_KEY);
   },
   
-  // Utility methods
   cancelToken: createCancelToken,
   
   setAuthToken: (token) => {

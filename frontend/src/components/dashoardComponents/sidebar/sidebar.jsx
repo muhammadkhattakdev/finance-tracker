@@ -300,9 +300,9 @@ const Sidebar = ({ mobileOpen, setMobileOpen, collapsed, toggleSidebar }) => {
         icon: <NotificationsIcon />,
         badge: unreadCount > 0 ? unreadCount : null
       },
-      { path: "/profile", name: "Profile", icon: <ProfileIcon /> },
+      {path: "/dashboard/profile", name: "Profile", icon: <ProfileIcon />},
     ];
-  
+
     const handleLogout = async () => {
       try {
         await logout();
@@ -311,7 +311,7 @@ const Sidebar = ({ mobileOpen, setMobileOpen, collapsed, toggleSidebar }) => {
         console.error("Logout failed:", error);
       }
     };
-  
+
     return (
       <>
         <aside

@@ -13,8 +13,7 @@ const ExpenseModal = ({ onClose, onSave, categories }) => {
   const [errors, setErrors] = useState({});
   const modalRef = useRef(null);
   const firstInputRef = useRef(null);
-  
-  // Add notifications context
+
   const { checkForNewNotifications } = useNotifications();
 
   useEffect(() => {
@@ -22,14 +21,12 @@ const ExpenseModal = ({ onClose, onSave, categories }) => {
       firstInputRef.current.focus();
     }
     
-    // Handle outside click
     const handleClickOutside = (event) => {
       if (modalRef.current && !modalRef.current.contains(event.target)) {
         onClose();
       }
     };
     
-    // Handle escape key
     const handleEscKey = (event) => {
       if (event.key === 'Escape') {
         onClose();
@@ -39,7 +36,6 @@ const ExpenseModal = ({ onClose, onSave, categories }) => {
     document.addEventListener('mousedown', handleClickOutside);
     document.addEventListener('keydown', handleEscKey);
     
-    // Prevent background scroll
     document.body.style.overflow = 'hidden';
     
     return () => {
@@ -56,7 +52,6 @@ const ExpenseModal = ({ onClose, onSave, categories }) => {
       [name]: value
     }));
     
-    // Clear error when field is edited
     if (errors[name]) {
       setErrors(prevErrors => ({
         ...prevErrors,
@@ -94,26 +89,22 @@ const ExpenseModal = ({ onClose, onSave, categories }) => {
     e.preventDefault();
     
     if (validateForm()) {
-      // Convert amount to number and ensure category is a number
       const formattedData = {
         ...formData,
         amount: parseFloat(formData.amount),
         category: parseInt(formData.category, 10)
       };
       
-      // Call the onSave callback
       await onSave(formattedData);
       
-      // Check for new notifications after adding expense
       setTimeout(() => {
         checkForNewNotifications();
-      }, 500); // Small delay to allow backend to process
+      }, 500); 
       
       onClose();
     }
   };
 
-  // Get selected category object
   const selectedCategory = categories.find(cat => cat.id === parseInt(formData.category, 10)) || categories[0];
 
   return (
@@ -142,7 +133,7 @@ const ExpenseModal = ({ onClose, onSave, categories }) => {
           
           <div className="form-row">
             <div className="form-group">
-              <label htmlFor="amount">Amount ($)</label>
+              <label htmlFor="amount">Amount (£)</label>
               <input
                 type="number"
                 id="amount"
@@ -196,7 +187,7 @@ const ExpenseModal = ({ onClose, onSave, categories }) => {
             </div>
             {errors.category && <div className="error-message">{errors.category}</div>}
           </div>
-          
+
           <div className="form-group">
             <label htmlFor="comment">Comment (Optional)</label>
             <textarea
@@ -208,7 +199,7 @@ const ExpenseModal = ({ onClose, onSave, categories }) => {
               rows="3"
             ></textarea>
           </div>
-          
+
           <div className="form-actions">
             <button type="button" className="cancel-button" onClick={onClose}>
               Cancel

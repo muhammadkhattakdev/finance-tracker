@@ -3,7 +3,7 @@ import './style.css';
 
 // Improved SVG Icons Component
 const MoneyBagIcon = ({ color }) => (
-<svg width="800px" height="800px" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" stroke-width="3" stroke={color} fill="none"><path d="M49.19,57.34H14.81L16,35.91A15.46,15.46,0,0,1,31.44,21.3h1.83A14.71,14.71,0,0,1,48,35.2Z"/><path d="M27.38,21.84,19.72,7.39a.5.5,0,0,1,.52-.73l4.65.77a46,46,0,0,0,14.76.05l5.11-.81a.5.5,0,0,1,.51.75L36.85,21.53"/><line x1="28.23" y1="13.15" x2="30.73" y2="21.3" stroke-linecap="round"/><line x1="35.14" y1="14.79" x2="33.79" y2="21.31" stroke-linecap="round"/><path d="M38.34,50.12H26.12a.1.1,0,0,1-.07-.16c.83-.9,4.83-5.47,3.3-9.59-1.7-4.59-.6-11.88,7.64-8.49" stroke-linecap="round"/><line x1="24.19" y1="40.49" x2="35.59" y2="40.49" stroke-linecap="round"/></svg>
+<svg width="800px" height="800px" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" strokeWidth="3" stroke={color} fill="none"><path d="M49.19,57.34H14.81L16,35.91A15.46,15.46,0,0,1,31.44,21.3h1.83A14.71,14.71,0,0,1,48,35.2Z"/><path d="M27.38,21.84,19.72,7.39a.5.5,0,0,1,.52-.73l4.65.77a46,46,0,0,0,14.76.05l5.11-.81a.5.5,0,0,1,.51.75L36.85,21.53"/><line x1="28.23" y1="13.15" x2="30.73" y2="21.3" strokeLinecap="round"/><line x1="35.14" y1="14.79" x2="33.79" y2="21.31" strokeLinecap="round"/><path d="M38.34,50.12H26.12a.1.1,0,0,1-.07-.16c.83-.9,4.83-5.47,3.3-9.59-1.7-4.59-.6-11.88,7.64-8.49" strokeLinecap="round"/><line x1="24.19" y1="40.49" x2="35.59" y2="40.49" strokeLinecap="round"/></svg>
 );
 
 const ChartIcon = ({ color }) => (
@@ -53,11 +53,11 @@ const WarningIcon = ({ color }) => (
 
 const ThumbsUpIcon = ({ color }) => (
 
-<svg fill="#6bceff" height="800px" width="800px" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 447.514 447.514" xml:space="preserve" stroke={color}>
+<svg fill="#6bceff" height="800px" width="800px" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink" viewBox="0 0 447.514 447.514" xmlSpace="preserve" stroke={color}>
 
-<g id="SVGRepo_bgCarrier" stroke-width="0"/>
+<g id="SVGRepo_bgCarrier" strokeWidth="0"/>
 
-<g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"/>
+<g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round"/>
 
 <g id="SVGRepo_iconCarrier"> <path d="M389.183,10.118c-3.536-2.215-7.963-2.455-11.718-0.634l-50.653,24.559c-35.906,17.409-77.917,16.884-113.377-1.418 c-38.094-19.662-83.542-18.72-120.789,2.487V20c0-11.046-8.954-20-20-20s-20,8.954-20,20v407.514c0,11.046,8.954,20,20,20 s20-8.954,20-20V220.861c37.246-21.207,82.694-22.148,120.789-2.487c35.46,18.302,77.47,18.827,113.377,1.418l56.059-27.18 c7.336-3.557,11.995-10.993,11.995-19.146V20.385C394.866,16.212,392.719,12.333,389.183,10.118z"/> </g>
 
@@ -102,9 +102,8 @@ const BudgetSummaryStats = ({ budgetData }) => {
 
   const { spending, percentages, category_breakdown } = budgetData;
   
-  // Calculate insights based on the data
   const totalSpent = spending.monthly || 0;
-  const formattedTotal = totalSpent.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+  const formattedTotal = totalSpent.toLocaleString('en-GB', { style: 'currency', currency: 'GBP' });
   
   // Find highest spending category
   let highestCategory = { name: 'None', amount: 0, percentage: 0, icon: <CategoryIcon color="#9E9E9E" />, color: '#9E9E9E' };
@@ -116,7 +115,7 @@ const BudgetSummaryStats = ({ budgetData }) => {
   const today = new Date();
   const dayOfMonth = today.getDate();
   const dailyAvg = totalSpent / dayOfMonth;
-  const formattedDailyAvg = dailyAvg.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+  const formattedDailyAvg = dailyAvg.toLocaleString('en-GB', { style: 'currency', currency: 'GBP' });
   
   // Format percentage for highest category
   const highestCategoryPercentage = `${Math.round(highestCategory.percentage)}%`;

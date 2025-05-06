@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import "./style.css";
 import ExpenseModal from "../../../dashoardComponents/addExpenseModal/addExpenseModal";
 import Request from "../../../utils/request";
@@ -169,7 +169,6 @@ const ExportIcon = () => (
   </svg>
 );
 
-// Hardcoded categories
 const CATEGORIES = [
   { id: 1, name: "Groceries", icon: "🛒", color: "#4CAF50" },
   { id: 2, name: "Dining", icon: "🍽️", color: "#FF9800" },
@@ -198,14 +197,11 @@ const Pagination = ({
 
   if (totalPages <= 1) return null;
 
-  // Generate page numbers with ellipsis for large numbers of pages
   const getPageNumbers = () => {
     const pages = [];
 
-    // Always show first page
     pages.push(1);
 
-    // Current page neighborhood
     for (
       let i = Math.max(2, currentPage - 1);
       i <= Math.min(totalPages - 1, currentPage + 1);
@@ -220,12 +216,10 @@ const Pagination = ({
       }
     }
 
-    // Always show last page if more than 1 page
     if (totalPages > 1) {
       pages.push(totalPages);
     }
 
-    // Remove duplicates and ellipsis next to each other
     return Array.from(new Set(pages)).filter((page, index, array) => {
       if (page === "..." && array[index - 1] === "...") return false;
       return true;
@@ -274,54 +268,73 @@ const ExpensesPage = () => {
   const [sourceFilter, setSourceFilter] = useState(null);
   const [error, setError] = useState(null);
   const [syncing, setSyncing] = useState(false);
-
-  // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
   const itemsPerPage = 30;
+  
+  // Use refs to track actual filter state
+  const currentFilters = useRef({
+    category: null,
+    source: null,
+    search: "",
+    page: 1
+  });
 
-  useEffect(() => {
-    fetchExpenses();
-  }, [currentPage, searchQuery, selectedCategory, sourceFilter]);
-
+  // Function to fetch expenses with current filters
   const fetchExpenses = async () => {
     setIsLoading(true);
+    
     try {
-      // Build query parameters for filtering and pagination
+      // Build query parameters based on current filters
       let queryParams = new URLSearchParams();
-
-      // Add pagination parameters
-      queryParams.append("page", currentPage);
+      
+      // Always include pagination
+      queryParams.append("page", currentFilters.current.page);
       queryParams.append("page_size", itemsPerPage);
-
-      // Add search parameter if present
-      if (searchQuery) {
-        queryParams.append("search", searchQuery);
+      
+      // Add search if present
+      if (currentFilters.current.search) {
+        queryParams.append("search", currentFilters.current.search);
       }
-
-      if (selectedCategory) {
-        queryParams.append("category", selectedCategory);
+      
+      // Add category if selected
+      if (currentFilters.current.category !== null) {
+        queryParams.append("category", currentFilters.current.category);
       }
-
-      if (sourceFilter) {
-        queryParams.append("source", sourceFilter);
+      
+      // Handle source filter
+      if (currentFilters.current.source === "plaid") {
+        // For plaid, use server-side filtering
+        queryParams.append("source", "plaid");
       }
-
-      const response = await Request.get(
-        `/expenses/?${queryParams.toString()}`
-      );
-
-      // If the response includes pagination info
+      
+      // Make API request
+      const response = await Request.get(`/expenses/?${queryParams.toString()}`);
+      
+      // Process response
+      let fetchedExpenses;
+      let totalCount;
+      
       if (response.data.results) {
-        console.log(response.data.results);
-        setExpenses(response.data.results);
-        setTotalItems(response.data.count);
+        // Paginated response
+        fetchedExpenses = response.data.results;
+        totalCount = response.data.count;
       } else {
-        // Fallback for API that doesn't support pagination yet
-        setExpenses(response.data);
-        setTotalItems(response.data.length);
+        // Non-paginated response
+        fetchedExpenses = response.data;
+        totalCount = fetchedExpenses.length;
       }
-
+      
+      // Apply client-side filtering for manual source
+      if (currentFilters.current.source === "manual") {
+        const manualExpenses = fetchedExpenses.filter(expense => expense.source !== "plaid");
+        setExpenses(manualExpenses);
+        setTotalItems(manualExpenses.length);
+      } else {
+        setExpenses(fetchedExpenses);
+        setTotalItems(totalCount);
+      }
+      
       setError(null);
     } catch (err) {
       console.error("Error fetching expenses:", err);
@@ -330,6 +343,33 @@ const ExpensesPage = () => {
       setIsLoading(false);
     }
   };
+
+  // Initialize data on mount
+  useEffect(() => {
+    fetchExpenses();
+    
+    // Set up auto-refresh interval
+    const intervalId = setInterval(() => {
+      console.log("Auto-refreshing expenses data");
+      fetchExpenses();
+    }, 15 * 60 * 1000); // 15 minutes
+    
+    return () => clearInterval(intervalId);
+  }, []);
+  
+  // Apply filters immediately when they change
+  useEffect(() => {
+    // Update the ref with latest filter values
+    currentFilters.current = {
+      category: selectedCategory,
+      source: sourceFilter,
+      search: searchQuery,
+      page: currentPage
+    };
+    
+    // Fetch with new filters
+    fetchExpenses();
+  }, [selectedCategory, sourceFilter, searchQuery, currentPage]);
 
   const handleAddExpense = async (newExpense) => {
     setIsLoading(true);
@@ -362,7 +402,7 @@ const ExpensesPage = () => {
     setSyncing(true);
     try {
       await Request.post("/plaid/sync_transactions/");
-      await fetchExpenses(); // Refresh after sync
+      await fetchExpenses();
       setError(null);
     } catch (err) {
       console.error("Error syncing transactions:", err);
@@ -374,45 +414,63 @@ const ExpensesPage = () => {
 
   const handleExport = async (startDate, endDate) => {
     try {
-      // Build query parameters for the export
-      let queryParams = new URLSearchParams();
-
+      const queryParams = new URLSearchParams();
+      
       // Add date range
       queryParams.append("start_date", startDate);
       queryParams.append("end_date", endDate);
-
-      // Add other active filters
-      if (searchQuery) {
-        queryParams.append("search", searchQuery);
+      
+      // Add filters
+      if (currentFilters.current.search) {
+        queryParams.append("search", currentFilters.current.search);
       }
-
-      if (selectedCategory) {
-        queryParams.append("category", selectedCategory);
+      
+      if (currentFilters.current.category !== null) {
+        queryParams.append("category", currentFilters.current.category);
       }
-
-      if (sourceFilter) {
-        queryParams.append("source", sourceFilter);
+      
+      // Only include source filter for plaid
+      if (currentFilters.current.source === "plaid") {
+        queryParams.append("source", currentFilters.current.source);
       }
-
-      // Make a GET request to export endpoint with responseType 'blob'
+      
+      // Make export request
       const response = await Request.get(
         `/expenses/export/?${queryParams.toString()}`,
-        {
-          responseType: "blob",
-        }
+        { responseType: "blob" }
       );
-
-      // Create a download link and trigger download
-      const url = window.URL.createObjectURL(new Blob([response.data]));
+      
+      let blobData = response.data;
+      
+      // Process CSV for manual filter
+      if (currentFilters.current.source === "manual") {
+        const text = await response.data.text();
+        const lines = text.split('\n');
+        const header = lines[0];
+        const filteredLines = [header];
+        
+        // Filter out plaid entries
+        for (let i = 1; i < lines.length; i++) {
+          const line = lines[i].trim();
+          if (line && !line.includes('"plaid"') && !line.includes(',plaid,')) {
+            filteredLines.push(line);
+          }
+        }
+        
+        const filteredText = filteredLines.join('\n');
+        blobData = new Blob([filteredText], { type: 'text/csv' });
+      }
+      
+      // Create download link
+      const url = window.URL.createObjectURL(blobData);
       const link = document.createElement("a");
       link.href = url;
-      const fileName = `expenses_${startDate}_to_${endDate}.csv`;
-      link.setAttribute("download", fileName);
+      link.setAttribute("download", `expenses_${startDate}_to_${endDate}.csv`);
       document.body.appendChild(link);
       link.click();
       link.remove();
-
-      // Close the export modal
+      
+      // Close modal
       setIsExportModalOpen(false);
     } catch (err) {
       console.error("Error exporting expenses:", err);
@@ -422,7 +480,8 @@ const ExpensesPage = () => {
 
   const handlePageChange = (page) => {
     setCurrentPage(page);
-    // Scroll to top of the table when changing pages
+    
+    // Scroll to top of table
     window.scrollTo({
       top: document.querySelector(".expenses-table-container").offsetTop - 80,
       behavior: "smooth",
@@ -430,9 +489,7 @@ const ExpensesPage = () => {
   };
 
   const applyFilters = () => {
-    // Reset to the first page when applying new filters
     setCurrentPage(1);
-    fetchExpenses();
   };
 
   const resetFilters = () => {
@@ -440,8 +497,6 @@ const ExpensesPage = () => {
     setSelectedCategory(null);
     setSourceFilter(null);
     setCurrentPage(1);
-    // After resetting all filters, fetch expenses
-    fetchExpenses();
   };
 
   const handleSearchInputChange = (e) => {
@@ -456,6 +511,20 @@ const ExpensesPage = () => {
   const getCategoryById = (categoryId) => {
     const category = CATEGORIES.find((cat) => cat.id === categoryId);
     return category || { name: "", icon: "-", color: "#9E9E9E" };
+  };
+
+  // Handle category filter change - direct with no delay
+  const handleCategoryChange = (e) => {
+    const value = e.target.value ? Number(e.target.value) : null;
+    setSelectedCategory(value);
+    setCurrentPage(1);
+  };
+
+  // Handle source filter change - direct with no delay
+  const handleSourceChange = (e) => {
+    const value = e.target.value || null;
+    setSourceFilter(value);
+    setCurrentPage(1);
   };
 
   return (
@@ -494,12 +563,7 @@ const ExpensesPage = () => {
             <FilterIcon />
             <select
               value={selectedCategory || ""}
-              onChange={(e) => {
-                setSelectedCategory(
-                  e.target.value ? Number(e.target.value) : null
-                );
-                applyFilters();
-              }}
+              onChange={handleCategoryChange}
               className="category-select"
             >
               <option value="">All Categories</option>
@@ -515,10 +579,7 @@ const ExpensesPage = () => {
             <FilterIcon />
             <select
               value={sourceFilter || ""}
-              onChange={(e) => {
-                setSourceFilter(e.target.value || null);
-                applyFilters();
-              }}
+              onChange={handleSourceChange}
               className="source-select"
             >
               <option value="">All Sources</option>
@@ -615,7 +676,7 @@ const ExpensesPage = () => {
                         </div>
                       </td>
                       <td className="amount-cell">
-                        ${parseFloat(expense.amount).toFixed(2)}
+                      £{parseFloat(expense.amount).toFixed(2)}
                       </td>
                       <td>{format(new Date(expense.date), "dd MMM yyyy")}</td>
                       <td>
@@ -639,7 +700,7 @@ const ExpensesPage = () => {
                         {expense.comment ? (
                           <div className="comment-content">
                             {expense.comment.length > 50
-                              ? `${expense.comment.substring(0, 50)}...`
+                              ? `£{expense.comment.substring(0, 50)}...`
                               : expense.comment}
                           </div>
                         ) : (

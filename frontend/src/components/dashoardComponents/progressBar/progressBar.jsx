@@ -83,8 +83,8 @@ const BudgetProgressBar = ({
   const isExceeded = percentage >= 100;
   
   // Display values
-  const displayCurrent = current.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
-  const displayLimit = limit ? limit.toLocaleString('en-US', { style: 'currency', currency: 'USD' }) : 'Not set';
+  const displayCurrent = current.toLocaleString('en-GB', { style: 'currency', currency: 'GBP' });
+  const displayLimit = limit ? limit.toLocaleString('en-GB', { style: 'currency', currency: 'GBP' }) : 'Not set';
   
   return (
     <div className={`budget-progress-item ${isExceeded ? 'exceeded' : ''}`}>

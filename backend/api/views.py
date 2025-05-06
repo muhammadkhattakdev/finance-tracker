@@ -125,7 +125,7 @@ class ExpenseViewSet(viewsets.ModelViewSet):
                 user=self.request.user,
                 type='system',
                 title="Large Expense Added",
-                message=f"You've added a large expense of ${expense.amount:.2f} in the {category_name} category.",
+                message=f"You've added a large expense of £{expense.amount:.2f} in the {category_name} category.",
                 related_data={
                     'expense_id': expense.id,
                     'amount': float(expense.amount),
@@ -873,8 +873,8 @@ def create_budget_notification(user, budget_type, percentage, current_amount, bu
         current_amount: Current amount spent
         budget_limit: Budget limit amount
     """
-    formatted_amount = f"${current_amount:.2f}"
-    formatted_limit = f"${budget_limit:.2f}"
+    formatted_amount = f"£{current_amount:.2f}"
+    formatted_limit = f"£{budget_limit:.2f}"
     
     if percentage >= 100:
         notification_type = 'budget_exceed'

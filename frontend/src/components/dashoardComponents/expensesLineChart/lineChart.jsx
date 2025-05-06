@@ -91,15 +91,15 @@ const DailyExpenseChart = () => {
       return (
         <div className="expense-chart-tooltip">
           <p className="tooltip-date">{payload[0].payload.displayDate}</p>
-          <p className="tooltip-value">${payload[0].value.toFixed(2)}</p>
+          <p className="tooltip-value">£{payload[0].value.toFixed(2)}</p>
         </div>
       );
     }
     return null;
   };
 
-  const formattedTotal = totalSpent.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
-  const formattedAverage = averageDaily.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+  const formattedTotal = totalSpent.toLocaleString('en-GB', { style: 'currency', currency: 'GBP' });
+  const formattedAverage = averageDaily.toLocaleString('en-GB', { style: 'currency', currency: 'GBP' });
   
   const currentMonth = format(new Date(), 'MMMM yyyy');
 
@@ -157,7 +157,7 @@ const DailyExpenseChart = () => {
                 tickLine={false}
                 tickMargin={10}
                 tick={{ fill: '#888888', fontSize: 12 }}
-                tickFormatter={(value) => `$${value}`}
+                tickFormatter={(value) => `£${value}`}
               />
               <Tooltip content={<CustomTooltip />} />
               <Area

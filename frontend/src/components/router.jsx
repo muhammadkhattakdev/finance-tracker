@@ -15,6 +15,8 @@ import HomePage from "./pages/homepage/homepage";
 import HowToUsePage from "./pages/howToUsePage/howToUse";
 import NotFoundPage from "./pages/notFound/notFound";
 import ProfilePage from "./pages/dashboardPages/profilePage/profilePage";
+import EmailVerificationPage from "./pages/verifyEmail/verifyEmail";
+import ContactPage from "./pages/contactPage/contactPage";
 
 export default function Router() {
     return (
@@ -23,8 +25,10 @@ export default function Router() {
                 <Route path="/" element={<HomeLayout />}>
                     <Route index element={<HomePage />} />
                     <Route path="login" element={<LoginPage />} />
+                    <Route path="verify-email" element={<EmailVerificationPage />} />
                     <Route path="register" element={<RegisterPage />} />
                     <Route path="features" element={<FeaturesPage />} />
+                    <Route path="contact" element={<ContactPage />} />
                     <Route path="how-to-use" element={<HowToUsePage />} />
                 <Route path="*" element={<NotFoundPage />} />
                 </Route>

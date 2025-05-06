@@ -74,7 +74,7 @@ const ExpenseItem = ({ expense }) => {
         <div className="expense-item-category">{expense.category_name}</div>
       </div>
       <div className="expense-item-right">
-        <div className="expense-item-amount">${parseFloat(expense.amount).toFixed(2)}</div>
+        <div className="expense-item-amount">£{parseFloat(expense.amount).toFixed(2)}</div>
         <div className="expense-item-date">{formattedDate}</div>
       </div>
     </div>

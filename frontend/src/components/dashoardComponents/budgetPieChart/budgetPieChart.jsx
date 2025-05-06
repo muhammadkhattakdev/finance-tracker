@@ -226,9 +226,9 @@ const CustomTooltip = ({ active, payload }) => {
           <span className="tooltip-name">{data.name}</span>
         </div>
         <div className="tooltip-value">
-          {data.value.toLocaleString("en-US", {
+          {data.value.toLocaleString("en-GB", {
             style: "currency",
-            currency: "USD",
+            currency: "GBP",
           })}
         </div>
         <div className="tooltip-percentage">
@@ -259,9 +259,9 @@ const CustomLegend = ({ payload }) => {
               <span className="legend-text">{entry.value}</span>
             </div>
             <div className="legend-value">
-              {entry.payload.value.toLocaleString("en-US", {
+              {entry.payload.value.toLocaleString("en-GB", {
                 style: "currency",
-                currency: "USD",
+                currency: "GBP",
               })}
             </div>
           </div>
@@ -298,9 +298,9 @@ const CategoryPieChart = ({ data, title = "Category Breakdown" }) => {
   }));
 
   const total = formattedData.reduce((sum, item) => sum + item.value, 0);
-  const formattedTotal = total.toLocaleString("en-US", {
+  const formattedTotal = total.toLocaleString("en-GB", {
     style: "currency",
-    currency: "USD",
+    currency: "GBP",
   });
 
   const onPieEnter = (_, index) => {

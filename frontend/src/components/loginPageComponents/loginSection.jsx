@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Form, Formik } from 'formik';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import * as Yup from 'yup';
 import Input from './input';
 import Request from '../utils/request';
@@ -16,12 +16,32 @@ const LoginSchema = Yup.object().shape({
 
 const LoginSection = () => {
   const [errorMessage, setErrorMessage] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [showVerificationLink, setShowVerificationLink] = useState(false);
+  const [lastAttemptedEmail, setLastAttemptedEmail] = useState('');
+  
   const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    // Check if redirected from email verification
+    if (location.state?.verified) {
+      setSuccessMessage('Email verified successfully! You can now log in.');
+    }
+    
+    // Check if message from registration
+    if (location.state?.message) {
+      setSuccessMessage(location.state.message);
+    }
+  }, [location]);
 
   const handleLogin = async (values, { setSubmitting, resetForm }) => {
     setIsLoading(true);
     setErrorMessage('');
+    setSuccessMessage('');
+    setShowVerificationLink(false);
+    setLastAttemptedEmail(values.email);
     
     try {
       await Request.login(values.email, values.password);
@@ -30,7 +50,12 @@ const LoginSection = () => {
       
       navigate('/dashboard');
     } catch (error) {
-      setErrorMessage(error.message || 'Login failed. Please check your credentials.');
+      if (error.message === 'Account not verified') {
+        setErrorMessage('Your account is not verified. Please verify your email to continue.');
+        setShowVerificationLink(true);
+      } else {
+        setErrorMessage(error.message || 'Login failed. Please check your credentials.');
+      }
     } finally {
       setIsLoading(false);
       setSubmitting(false);
@@ -49,6 +74,12 @@ const LoginSection = () => {
           </p>
         </div>
         
+        {successMessage && (
+          <div className="success-alert">
+            {successMessage}
+          </div>
+        )}
+        
         <Formik
           initialValues={{
             email: '',
@@ -57,7 +88,7 @@ const LoginSection = () => {
           validationSchema={LoginSchema}
           onSubmit={handleLogin}
         >
-          {({ isSubmitting, errors, touched }) => (
+          {({ isSubmitting, errors, touched, values }) => (
             <Form className="auth-form">
               <div className="form-group">
                 <label htmlFor="email" className="form-label">
@@ -98,6 +129,17 @@ const LoginSection = () => {
               {errorMessage && (
                 <div className="error-alert">
                   {errorMessage}
+                  {showVerificationLink && (
+                    <div className="verification-link-container">
+                      <Link 
+                        to={`/verify-email`} 
+                        state={{ email: lastAttemptedEmail || values.email }}
+                        className="verification-link"
+                      >
+                        Go to verification page
+                      </Link>
+                    </div>
+                  )}
                 </div>
               )}
               
