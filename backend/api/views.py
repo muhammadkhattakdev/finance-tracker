@@ -153,7 +153,6 @@ class ExpenseViewSet(viewsets.ModelViewSet):
         """
         Export expenses as CSV based on filters
         """
-        # Get query parameters
         start_date = request.query_params.get('start_date')
         end_date = request.query_params.get('end_date')
         category = request.query_params.get('category')
@@ -166,10 +165,8 @@ class ExpenseViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
         
-        # Get filtered queryset
         queryset = self.get_queryset().filter(date__gte=start_date, date__lte=end_date)
         
-        # Apply additional filters if provided
         if category:
             queryset = queryset.filter(category=category)
         
@@ -182,28 +179,22 @@ class ExpenseViewSet(viewsets.ModelViewSet):
                 models.Q(comment__icontains=search)
             )
         
-        # Order by date
         queryset = queryset.order_by('date')
         
-        # Create the HttpResponse with CSV content
         response = HttpResponse(content_type='text/csv')
         response['Content-Disposition'] = f'attachment; filename="expenses_{start_date}_to_{end_date}.csv"'
         
-        # Create CSV writer
         writer = csv.writer(response)
         
-        # Write header row
         writer.writerow([
             'ID', 'Title', 'Amount', 'Date', 'Category', 
             'Source', 'Comment', 'Created At'
         ])
         
-        # Get category name dictionary for faster lookups
         categories = {
             cat.id: cat.name for cat in Category.objects.all()
         }
         
-        # Write data rows
         for expense in queryset:
             category_name = categories.get(expense.category_id, 'Uncategorized') if expense.category_id else 'Uncategorized'
             writer.writerow([
@@ -348,9 +339,9 @@ class ExchangePublicTokenView(APIView):
                 access_token=plaid_item.access_token,
                 cursor=None
             )
-            
+
             response = plaid_client.transactions_sync(request)
-            
+
             self.process_transactions(response['added'], plaid_item)
             
             # Store cursor for future syncs (in a real implementation)
@@ -467,7 +458,6 @@ def sync_transactions_endpoint(request):
                 
                 response = plaid_client.transactions_sync(request_obj)
                 
-                # Convert response to serializable format
                 added_transactions = response['added']
                 
                 default_category, _ = Category.objects.get_or_create(
@@ -485,23 +475,18 @@ def sync_transactions_endpoint(request):
                             account_id=transaction['account_id']
                         )
                         
-                        # Safely handle location data
                         location_data = {}
                         if 'location' in transaction:
                             try:
-                                # Try to convert to dict if it's an object
                                 if hasattr(transaction['location'], 'to_dict'):
                                     location_data = transaction['location'].to_dict()
                                 elif hasattr(transaction['location'], '__dict__'):
                                     location_data = transaction['location'].__dict__
                                 else:
-                                    # If it's already a simple type like dict, use it directly
                                     location_data = dict(transaction['location'])
                             except:
-                                # If conversion fails, use empty dict
                                 location_data = {}
                         
-                        # Safely handle payment_meta data
                         payment_meta_data = {}
                         if 'payment_meta' in transaction:
                             try:
@@ -865,7 +850,7 @@ class NotificationViewSet(viewsets.ModelViewSet):
 def create_budget_notification(user, budget_type, percentage, current_amount, budget_limit):
     """
     Create a notification for budget limits
-    
+
     Args:
         user: User object
         budget_type: 'daily', 'weekly', or 'monthly'
@@ -873,6 +858,7 @@ def create_budget_notification(user, budget_type, percentage, current_amount, bu
         current_amount: Current amount spent
         budget_limit: Budget limit amount
     """
+
     formatted_amount = f"£{current_amount:.2f}"
     formatted_limit = f"£{budget_limit:.2f}"
     
@@ -979,7 +965,6 @@ class ResendVerificationView(APIView):
                     status=status.HTTP_400_BAD_REQUEST
                 )
             
-            # Check if there are recent unverified codes
             recent_code = EmailVerification.objects.filter(
                 user=user,
                 is_used=False,
@@ -992,7 +977,6 @@ class ResendVerificationView(APIView):
                     status=status.HTTP_400_BAD_REQUEST
                 )
             
-            # Create new verification code and send email
             from .utils import create_verification_code
             create_verification_code(user)
             

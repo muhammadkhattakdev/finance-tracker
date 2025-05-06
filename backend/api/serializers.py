@@ -161,7 +161,6 @@ class BudgetSerializer(serializers.ModelSerializer):
     
 
 
-# Add to serializers.py
 
 class NotificationSerializer(serializers.ModelSerializer):
     time_ago = serializers.SerializerMethodField()

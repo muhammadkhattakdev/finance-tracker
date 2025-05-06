@@ -34,7 +34,6 @@ const EmailVerificationPage = () => {
   }, [location]);
   
   useEffect(() => {
-    // Countdown timer for resend button
     if (countdown > 0) {
       const timer = setTimeout(() => setCountdown(countdown - 1), 1000);
       return () => clearTimeout(timer);
@@ -46,29 +45,24 @@ const EmailVerificationPage = () => {
   const handleInputChange = (index, e) => {
     const value = e.target.value;
     
-    // Only allow one digit
     if (value && !/^\d*$/.test(value)) {
       return;
     }
     
-    // Update the verification code array
     const newVerificationCode = [...verificationCode];
     newVerificationCode[index] = value;
     setVerificationCode(newVerificationCode);
     
-    // If a digit was entered, move focus to the next input
     if (value && index < 5) {
       inputRefs[index + 1].current.focus();
     }
     
-    // If all digits are entered, submit the form
     if (value && index === 5 && newVerificationCode.every(digit => digit)) {
       handleVerify();
     }
   };
   
   const handleKeyDown = (index, e) => {
-    // If backspace is pressed and current input is empty, move focus to previous input
     if (e.key === 'Backspace' && !verificationCode[index] && index > 0) {
       inputRefs[index - 1].current.focus();
     }
@@ -90,9 +84,8 @@ const EmailVerificationPage = () => {
       
       setSuccess('Email verified successfully! You will be redirected to the login page.');
       
-      // Redirect to login page after a short delay
       setTimeout(() => {
-        navigate('/login', { state: { verified: true, email } });
+        navigate('/dashboard', { state: { verified: true, email } });
       }, 2000);
       
     } catch (err) {

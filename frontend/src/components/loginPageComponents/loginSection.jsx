@@ -25,12 +25,10 @@ const LoginSection = () => {
   const location = useLocation();
 
   useEffect(() => {
-    // Check if redirected from email verification
     if (location.state?.verified) {
       setSuccessMessage('Email verified successfully! You can now log in.');
     }
     
-    // Check if message from registration
     if (location.state?.message) {
       setSuccessMessage(location.state.message);
     }
@@ -48,7 +46,7 @@ const LoginSection = () => {
       
       resetForm();
       
-      navigate('/dashboard');
+      return window.location.href = '/dashboard';
     } catch (error) {
       if (error.message === 'Account not verified') {
         setErrorMessage('Your account is not verified. Please verify your email to continue.');

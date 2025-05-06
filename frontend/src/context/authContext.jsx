@@ -37,13 +37,11 @@ export const AuthProvider = ({ children }) => {
     return await Request.register(userData);
   };
 
-  // Logout function
   const logout = () => {
     Request.logout();
     setCurrentUser(null);
   };
 
-  // Update user profile
   const updateProfile = async (userData) => {
     const response = await Request.patch(import.meta.env.VITE_AUTH_USER_ENDPOINT, userData);
     setCurrentUser(response.data);

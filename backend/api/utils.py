@@ -37,10 +37,8 @@ def create_verification_code(user):
     """Create a verification code for the user"""
     from .models import EmailVerification
     
-    # Mark any existing codes as used
     EmailVerification.objects.filter(user=user, is_used=False).update(is_used=True)
     
-    # Create a new code
     code = generate_verification_code()
     expires_at = timezone.now() + timedelta(minutes=5)
     
@@ -50,7 +48,6 @@ def create_verification_code(user):
         expires_at=expires_at
     )
     
-    # Send verification email
     send_verification_email(user, code)
     
     return verification

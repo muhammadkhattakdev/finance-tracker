@@ -36,7 +36,7 @@ MIDDLEWARE = [
 ROOT_URLCONF = 'backend.urls'
 
 
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'  # This sends emails to console for development
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'  
 DEFAULT_FROM_EMAIL = 'noreply@financetracker.com'
 
 
@@ -117,7 +117,6 @@ SIMPLE_JWT = {
 AUTH_USER_MODEL = 'api.User'
 
 
-# PLAID SETTINGS 
 
 PLAID = {
     'CLIENT_ID': '680bc2592d01190023379e63',

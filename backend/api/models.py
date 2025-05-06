@@ -8,7 +8,6 @@ from django.utils import timezone
 
 def generate_unique_username(first_name, last_name):
     """Generate a unique username from first and last name"""
-    # Start with lowercase first letter of first name + last name
     if first_name and last_name:
         base_username = (first_name[0] + last_name).lower()
     elif first_name:
@@ -18,10 +17,8 @@ def generate_unique_username(first_name, last_name):
     else:
         base_username = "user"
     
-    # Remove spaces and special characters
     base_username = ''.join(e for e in base_username if e.isalnum())
     
-    # Add a random suffix to ensure uniqueness
     unique_id = uuid.uuid4().hex[:6]
     return f"{base_username}_{unique_id}"
 
@@ -33,7 +30,6 @@ class UserManager(BaseUserManager):
             raise ValueError('The Email field must be set')
         email = self.normalize_email(email)
         
-        # Set username to None explicitly
         extra_fields.setdefault('username', None)
         
         user = self.model(email=email, **extra_fields)
@@ -82,8 +78,8 @@ class User(AbstractUser):
 
 class Category(models.Model):
     name = models.CharField(max_length=100)
-    icon = models.CharField(max_length=100, blank=True, null=True)  # For storing icon names or emoji
-    color = models.CharField(max_length=20, blank=True, null=True)  # For storing color codes
+    icon = models.CharField(max_length=100, blank=True, null=True) 
+    color = models.CharField(max_length=20, blank=True, null=True) 
     
     class Meta:
         verbose_name_plural = "Categories"
@@ -102,7 +98,6 @@ class Expense(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
-    # Add the source field here
     SOURCE_CHOICES = (
         ('manual', 'Manual'),
         ('plaid', 'Plaid')
@@ -203,7 +198,6 @@ class Budget(models.Model):
         return f"{self.user.email} - {self.get_period_display()} Budget: ${self.amount}"
 
 
-# Add to models.py
 
 class Notification(models.Model):
     NOTIFICATION_TYPES = (
@@ -218,7 +212,7 @@ class Notification(models.Model):
     title = models.CharField(max_length=100)
     message = models.TextField()
     is_read = models.BooleanField(default=False)
-    related_data = models.JSONField(null=True, blank=True)  # Store related budget, expense ID, etc.
+    related_data = models.JSONField(null=True, blank=True)  
     created_at = models.DateTimeField(auto_now_add=True)
     
     class Meta:
