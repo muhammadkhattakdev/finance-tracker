@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import "./style.css";
+import Request from "../../utils/request"; 
 
 const EmailIcon = () => (
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -39,7 +40,8 @@ const ContactPage = () => {
   const [formStatus, setFormStatus] = useState({
     submitted: false,
     error: false,
-    message: ""
+    message: "",
+    isSubmitting: false
   });
   
   const [isVisible, setIsVisible] = useState(false);
@@ -64,6 +66,7 @@ const ContactPage = () => {
       });
     };
     
+    // Initial check on load
     setTimeout(handleScroll, 100);
     
     window.addEventListener('scroll', handleScroll);
@@ -78,14 +81,16 @@ const ContactPage = () => {
     });
   };
   
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     
+    // Validate form
     if (!formData.fullName || !formData.email || !formData.message) {
       setFormStatus({
         submitted: false,
         error: true,
-        message: "Please fill in all required fields."
+        message: "Please fill in all required fields.",
+        isSubmitting: false
       });
       return;
     }
@@ -96,25 +101,48 @@ const ContactPage = () => {
       setFormStatus({
         submitted: false,
         error: true,
-        message: "Please enter a valid email address."
+        message: "Please enter a valid email address.",
+        isSubmitting: false
       });
       return;
     }
     
-    setFormStatus({
-      submitted: true,
-      error: false,
-      message: "Thank you for your message! We'll get back to you soon."
-    });
-    
-    setFormData({
-      fullName: "",
-      email: "",
-      phone: "",
-      message: ""
-    });
-    
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    try {
+      setFormStatus({
+        ...formStatus,
+        isSubmitting: true
+      });
+      
+      // Send the data to the backend
+      const response = await Request.post('/contact/', formData);
+      
+      setFormStatus({
+        submitted: true,
+        error: false,
+        message: response.data?.message || "Thank you for your message! We'll get back to you soon.",
+        isSubmitting: false
+      });
+      
+      // Reset form
+      setFormData({
+        fullName: "",
+        email: "",
+        phone: "",
+        message: ""
+      });
+      
+      // Scroll to top to show success message
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } catch (error) {
+      console.error("Contact form submission error:", error);
+      
+      setFormStatus({
+        submitted: false,
+        error: true,
+        message: error.message || "An error occurred. Please try again later.",
+        isSubmitting: false
+      });
+    }
   };
   
   return (
@@ -175,6 +203,7 @@ const ContactPage = () => {
                       onChange={handleInputChange}
                       placeholder="Your full name"
                       required
+                      disabled={formStatus.isSubmitting}
                     />
                   </div>
                   
@@ -188,6 +217,7 @@ const ContactPage = () => {
                       onChange={handleInputChange}
                       placeholder="Your email address"
                       required
+                      disabled={formStatus.isSubmitting}
                     />
                   </div>
                   
@@ -200,6 +230,7 @@ const ContactPage = () => {
                       value={formData.phone}
                       onChange={handleInputChange}
                       placeholder="Your phone number (optional)"
+                      disabled={formStatus.isSubmitting}
                     />
                   </div>
                   
@@ -213,11 +244,16 @@ const ContactPage = () => {
                       placeholder="How can we help you?"
                       rows="5"
                       required
+                      disabled={formStatus.isSubmitting}
                     ></textarea>
                   </div>
                   
-                  <button type="submit" className="contact__submit-button">
-                    Send Message
+                  <button 
+                    type="submit" 
+                    className="contact__submit-button"
+                    disabled={formStatus.isSubmitting}
+                  >
+                    {formStatus.isSubmitting ? "Sending..." : "Send Message"}
                   </button>
                 </form>
               </div>
@@ -248,7 +284,7 @@ const ContactPage = () => {
                     </div>
                     <div className="contact__info-content">
                       <h3>Call Us</h3>
-                      <a href="tel:+18001234567">+1 (800) 123-4567</a>
+                      <a href="tel:+448001234567">+44 (800) 123-4567</a>
                     </div>
                   </div>
                   
@@ -258,7 +294,7 @@ const ContactPage = () => {
                     </div>
                     <div className="contact__info-content">
                       <h3>Visit Us</h3>
-                      <p>123 Finance Street, Suite 500<br />San Francisco, CA 94103</p>
+                      <p>123 Finance Street, Suite 500<br />London, EC1A 1BB</p>
                     </div>
                   </div>
                 </div>

@@ -83,7 +83,7 @@ const EmailVerificationPage = () => {
       await Request.verifyEmail(email, code);
       
       setSuccess('Email verified successfully! You will be redirected to the login page.');
-      
+
       setTimeout(() => {
         navigate('/dashboard', { state: { verified: true, email } });
       }, 2000);

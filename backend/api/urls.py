@@ -27,6 +27,9 @@ urlpatterns = [
     path('plaid/exchange_public_token/', ExchangePublicTokenView.as_view(), name='exchange-public-token'),
     path('plaid/sync_transactions/', sync_transactions_endpoint, name='sync-transactions'),
     path('plaid/items/<int:pk>/unlink/', unlink_bank_endpoint, name='unlink-bank'),
+    path('contact/', ContactFormView.as_view(), name='contact'),
+
+
 
     # Include router URLs
     path('', include(router.urls)),

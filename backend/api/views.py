@@ -990,3 +990,51 @@ class ResendVerificationView(APIView):
                 status=status.HTTP_404_NOT_FOUND
             )
 
+
+class ContactFormView(APIView):
+    """
+    View for handling contact form submissions
+    """
+    permission_classes = []  # Allow unauthenticated access
+    
+    def post(self, request):
+        try:
+            # Extract form data
+            name = request.data.get('fullName', '')
+            email = request.data.get('email', '')
+            phone = request.data.get('phone', '')
+            message = request.data.get('message', '')
+            
+            # Validate required fields
+            if not name or not email or not message:
+                return Response(
+                    {"error": "Please fill in all required fields"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            # Create dummy email in console
+            print("\n" + "="*50)
+            print("NEW CONTACT FORM SUBMISSION")
+            print("="*50)
+            print(f"From: {name} <{email}>")
+            if phone:
+                print(f"Phone: {phone}")
+            print("-"*50)
+            print("Message:")
+            print(message)
+            print("="*50 + "\n")
+            
+            # In a real implementation, you would send an email here
+            # send_mail(...) or similar
+            
+            return Response({
+                "success": True,
+                "message": "Thank you for your message! We'll get back to you soon."
+            }, status=status.HTTP_200_OK)
+            
+        except Exception as e:
+            print(f"Error processing contact form: {str(e)}")
+            return Response(
+                {"error": "An error occurred while processing your request."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
