@@ -1,7 +1,5 @@
 # Finance Tracker
 
-![Finance Tracker Logo](./public/images/logo.png)
-
 A comprehensive personal finance management application that helps users track expenses, create budgets, connect bank accounts, and visualize financial data.
 
 ## Table of Contents
@@ -73,8 +71,6 @@ The application uses Plaid API for secure bank connections, React for the fronte
   - System notifications
 
 ## Demo
-
-Visit the live demo at [finance-tracker.example.com](https://finance-tracker.example.com)
 
 **Demo Account:**
 - Email: demo@example.com
@@ -470,10 +466,6 @@ python manage.py test
 3. Commit your changes: `git commit -m 'Add some amazing feature'`
 4. Push to the branch: `git push origin feature/amazing-feature`
 5. Open a Pull Request
-
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
 
 ## Acknowledgements
 
